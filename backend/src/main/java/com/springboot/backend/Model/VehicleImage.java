@@ -1,5 +1,6 @@
 package com.springboot.backend.Model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -25,10 +26,14 @@ public class VehicleImage {
     @Lob
     private byte[] imageData;
 
+    @Transient // Không lưu vào cơ sở dữ liệu
+    private String imageUri;
+
     @Column(name = "is_thumbnail")
     private Boolean isThumbnail;
 
     @ManyToOne
     @JoinColumn(name = "vehicle_id")
+    @JsonIgnore
     private Vehicle vehicle;
 }

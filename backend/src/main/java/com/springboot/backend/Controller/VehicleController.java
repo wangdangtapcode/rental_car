@@ -1,17 +1,12 @@
 package com.springboot.backend.Controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.springboot.backend.DTO.CustomerDTO;
-import com.springboot.backend.DTO.VehicleDetailDTO;
-import com.springboot.backend.DTO.VehicleSearchDTO;
 import com.springboot.backend.Model.Vehicle;
 import com.springboot.backend.Model.VehicleImage;
 import com.springboot.backend.Service.VehicleService;
-import com.springboot.backend.Utils.ImageUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
-import org.springframework.stereotype.Repository;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -25,24 +20,24 @@ public class VehicleController {
     private VehicleService vehicleService;
 
     @GetMapping(value = "/api/vehicle/random/{count}")
-    public List<VehicleSearchDTO> findToViewHome(@PathVariable int count) {
+    public List<Vehicle> findToViewHome(@PathVariable int count) {
         return vehicleService.findToViewHome(count);
     }
     @GetMapping(value = "/api/vehicle/all")
-    public List<VehicleSearchDTO> findToViewHome() {
-        return vehicleService.findViewAll();
+    public List<Vehicle> findToViewHome() {
+        return vehicleService.findVehicleActiveAll();
     }
     @GetMapping(value = "/api/vehicle/view/{id}")
-    public VehicleDetailDTO findVehicleToView(@PathVariable Long id) {
+    public Vehicle findVehicleToView(@PathVariable Long id) {
         return vehicleService.findVehicleToView(id);
     }
     @GetMapping(value = "/api/management/vehicle/search")
-    public List<VehicleSearchDTO> findByName(@RequestParam String name){
+    public List<Vehicle> findByName(@RequestParam String name){
         return vehicleService.findByName(name);
     }
 
     @GetMapping(value = "/api/management/vehicle/search/all")
-    public List<VehicleSearchDTO> findAll(){
+    public List<Vehicle> findAll(){
         return vehicleService.findAll();
     }
 
@@ -68,8 +63,8 @@ public class VehicleController {
         return vehicleService.createVehicle(vehicle);
     }
     @GetMapping(value = "/api/management/vehicle/edit/{id}")
-    public VehicleDetailDTO getVehicleToEdit(@PathVariable("id") Long id){
-    return vehicleService.getVehicleToEdit(id);
+    public Vehicle getVehicleToEdit(@PathVariable("id") Long id){
+        return vehicleService.getVehicleToEdit(id);
     }
     @PostMapping(value = "/api/management/vehicle/edit/{id}",consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public boolean EditVehicle(
@@ -106,7 +101,7 @@ public class VehicleController {
         return vehicleService.editVehicle(id,vehicle);
     }
     @GetMapping(value = "/api/management/vehicle/detail/{id}")
-    public VehicleDetailDTO getVehicleToDetail(@PathVariable Long id){
+    public Vehicle getVehicleToDetail(@PathVariable Long id){
         return vehicleService.getVehicleToDetail(id);
     }
     @DeleteMapping(value = "/api/management/vehicle/del/{id}")

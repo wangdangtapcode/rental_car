@@ -1,8 +1,5 @@
 package com.springboot.backend.Service.impl;
 
-import com.springboot.backend.DTO.VehicleImageDTO;
-import com.springboot.backend.DTO.VehicleDetailDTO;
-import com.springboot.backend.DTO.VehicleSearchDTO;
 import com.springboot.backend.Model.Vehicle;
 import com.springboot.backend.Model.VehicleImage;
 import com.springboot.backend.Repository.VehicleImageRepository;
@@ -30,72 +27,93 @@ public class VehicleServiceImpl implements VehicleService {
     private final VehicleImageRepository vehicleImageRepository;
 
     @Override
-    public List<VehicleSearchDTO> findToViewHome(int count) {
+    public List<Vehicle> findToViewHome(int count){
         List<Vehicle> vehicles = vehicleRepository.findRandomToViewHome(count);
-        if(vehicles.size() != count) return null;
-        List<VehicleSearchDTO> vehicleSearchDTOS = new ArrayList<>();
+
+        if(vehicles.size() != count) return new ArrayList<>();
+        List<Vehicle> vehicleList= new ArrayList<>();
         for (Vehicle vehicle : vehicles) {
-            VehicleSearchDTO vehicleSearchDTO = new VehicleSearchDTO();
+            Vehicle vehicleDTO = new Vehicle();
+            vehicleDTO.setId(vehicle.getId());
+            vehicleDTO.setName(vehicle.getName());
+            vehicleDTO.setBrand(vehicle.getBrand());
+            vehicleDTO.setType(vehicle.getType());
+            vehicleDTO.setSeatCount(vehicle.getSeatCount());
+            vehicleDTO.setManufactureYear(vehicle.getManufactureYear());
+            vehicleDTO.setDescription(vehicle.getDescription());
+            VehicleImage thumbnail = vehicleImageRepository.findByVehicleIdAndIsThumbnailIsTrue(vehicle.getId());
+            if (thumbnail != null ) {
+                try {
+                    List<VehicleImage> list = new ArrayList<>();
+                    String imgBase64 = ImageUtils.encodeToBase64(thumbnail.getImageData());
+                    String imageUri = "data:" + thumbnail.getType() + ";base64," + imgBase64;
+                    thumbnail.setImageData(null);
+                    thumbnail.setImageUri(imageUri);
+                    list.add(thumbnail);
+                    vehicleDTO.setVehicleImages(list);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    vehicleDTO.setVehicleImages(null);
+                }
+            } else {
+                vehicleDTO.setVehicleImages(null);
+            }
+
+            vehicleList.add(vehicleDTO);
+        }
+
+
+        return vehicleList;
+    }
+
+    @Override
+    public List<Vehicle> findVehicleActiveAll() {
+        List<Vehicle> vehicles = vehicleRepository.findVehicleActiveAll();
+        List<Vehicle> vehicleList = new ArrayList<>();
+        for (Vehicle vehicle : vehicles) {
+            Vehicle vehicleSearchDTO = new Vehicle();
             vehicleSearchDTO.setId(vehicle.getId());
             vehicleSearchDTO.setName(vehicle.getName());
             vehicleSearchDTO.setBrand(vehicle.getBrand());
             vehicleSearchDTO.setType(vehicle.getType());
+            vehicleSearchDTO.setRentalPrice(vehicle.getRentalPrice());
+            vehicleSearchDTO.setLicensePlate(vehicle.getLicensePlate());
+            vehicleSearchDTO.setVehicleCondition(vehicle.getVehicleCondition());
             vehicleSearchDTO.setSeatCount(vehicle.getSeatCount());
             vehicleSearchDTO.setManufactureYear(vehicle.getManufactureYear());
             vehicleSearchDTO.setDescription(vehicle.getDescription());
             VehicleImage thumbnail = vehicleImageRepository.findByVehicleIdAndIsThumbnailIsTrue(vehicle.getId());
             if (thumbnail != null ) {
-                String base64Image = ImageUtils.encodeToBase64(thumbnail.getImageData());
-                String base64WithPrefix = "data:" + thumbnail.getType() + ";base64," + base64Image;
-
-                vehicleSearchDTO.setThumbnailImage(base64WithPrefix);
+                try {
+                    List<VehicleImage> list = new ArrayList<>();
+                    String imgBase64 = ImageUtils.encodeToBase64(thumbnail.getImageData());
+                    String imageUri = "data:" + thumbnail.getType() + ";base64," + imgBase64;
+                    thumbnail.setImageData(null);
+                    thumbnail.setImageUri(imageUri);
+                    list.add(thumbnail);
+                    vehicleSearchDTO.setVehicleImages(list);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    vehicleSearchDTO.setVehicleImages(null);
+                }
             } else {
-                vehicleSearchDTO.setThumbnailImage("");
+                vehicleSearchDTO.setVehicleImages(null);
             }
 
-            vehicleSearchDTOS.add(vehicleSearchDTO);
+            vehicleList.add(vehicleSearchDTO);
         }
 
 
-        return vehicleSearchDTOS;
+        return vehicleList;
     }
 
     @Override
-    public List<VehicleSearchDTO> findViewAll() {
-        List<Vehicle> vehicles = vehicleRepository.findViewAll();
-        List<VehicleSearchDTO> vehicleSearchDTOS = new ArrayList<>();
-        for (Vehicle vehicle : vehicles) {
-            VehicleSearchDTO vehicleSearchDTO = new VehicleSearchDTO();
-            vehicleSearchDTO.setId(vehicle.getId());
-            vehicleSearchDTO.setName(vehicle.getName());
-            vehicleSearchDTO.setBrand(vehicle.getBrand());
-            vehicleSearchDTO.setType(vehicle.getType());
-            vehicleSearchDTO.setSeatCount(vehicle.getSeatCount());
-            vehicleSearchDTO.setManufactureYear(vehicle.getManufactureYear());
-            vehicleSearchDTO.setDescription(vehicle.getDescription());
-            VehicleImage thumbnail = vehicleImageRepository.findByVehicleIdAndIsThumbnailIsTrue(vehicle.getId());
-            if (thumbnail != null ) {
-                String base64Image = ImageUtils.encodeToBase64(thumbnail.getImageData());
-                String base64WithPrefix = "data:" + thumbnail.getType() + ";base64," + base64Image;
-
-                vehicleSearchDTO.setThumbnailImage(base64WithPrefix);
-            } else {
-                vehicleSearchDTO.setThumbnailImage("");
-            }
-
-            vehicleSearchDTOS.add(vehicleSearchDTO);
-        }
-
-
-        return vehicleSearchDTOS;
-    }
-
-    @Override
-    public List<VehicleSearchDTO> findByName(String name) {
+    public List<Vehicle> findByName(String name) {
         List<Vehicle> vehicles = vehicleRepository.findFirst20ByNameContaining(name);
-        List<VehicleSearchDTO> vehicleSearchDTOS = new ArrayList<>();
+        List<Vehicle> vehicleList = new ArrayList<>();
+
         for (Vehicle vehicle : vehicles) {
-            VehicleSearchDTO vehicleSearchDTO = new VehicleSearchDTO();
+            Vehicle vehicleSearchDTO = new Vehicle();
             vehicleSearchDTO.setId(vehicle.getId());
             vehicleSearchDTO.setName(vehicle.getName());
             vehicleSearchDTO.setBrand(vehicle.getBrand());
@@ -107,27 +125,35 @@ public class VehicleServiceImpl implements VehicleService {
             vehicleSearchDTO.setRentalPrice(vehicle.getRentalPrice());
             VehicleImage thumbnail = vehicleImageRepository.findByVehicleIdAndIsThumbnailIsTrue(vehicle.getId());
             if (thumbnail != null ) {
-                String base64Image = ImageUtils.encodeToBase64(thumbnail.getImageData());
-                String base64WithPrefix = "data:" + thumbnail.getType() + ";base64," + base64Image;
-
-                vehicleSearchDTO.setThumbnailImage(base64WithPrefix);
+                try {
+                    List<VehicleImage> list = new ArrayList<>();
+                    String imgBase64 = ImageUtils.encodeToBase64(thumbnail.getImageData());
+                    String imageUri = "data:" + thumbnail.getType() + ";base64," + imgBase64;
+                    thumbnail.setImageData(null);
+                    thumbnail.setImageUri(imageUri);
+                    list.add(thumbnail);
+                    vehicleSearchDTO.setVehicleImages(list);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    vehicleSearchDTO.setVehicleImages(null);
+                }
             } else {
-                vehicleSearchDTO.setThumbnailImage("");
+                vehicleSearchDTO.setVehicleImages(null);
             }
 
-            vehicleSearchDTOS.add(vehicleSearchDTO);
+            vehicleList.add(vehicleSearchDTO);
         }
 
 
-        return vehicleSearchDTOS;
+        return vehicleList;
     }
 
     @Override
-    public List<VehicleSearchDTO> findAll() {
+    public List<Vehicle> findAll() {
         List<Vehicle> vehicles = vehicleRepository.findTop20ByOrderByIdAsc();
-        List<VehicleSearchDTO> vehicleSearchDTOS = new ArrayList<>();
+        List<Vehicle> vehicleList = new ArrayList<>();
         for (Vehicle vehicle : vehicles) {
-            VehicleSearchDTO vehicleSearchDTO = new VehicleSearchDTO();
+            Vehicle vehicleSearchDTO = new Vehicle();
             vehicleSearchDTO.setId(vehicle.getId());
             vehicleSearchDTO.setName(vehicle.getName());
             vehicleSearchDTO.setBrand(vehicle.getBrand());
@@ -139,19 +165,27 @@ public class VehicleServiceImpl implements VehicleService {
             vehicleSearchDTO.setRentalPrice(vehicle.getRentalPrice());
             VehicleImage thumbnail = vehicleImageRepository.findByVehicleIdAndIsThumbnailIsTrue(vehicle.getId());
             if (thumbnail != null ) {
-                String base64Image = ImageUtils.encodeToBase64(thumbnail.getImageData());
-                String base64WithPrefix = "data:" + thumbnail.getType() + ";base64," + base64Image;
-
-                vehicleSearchDTO.setThumbnailImage(base64WithPrefix);
+                try {
+                    List<VehicleImage> list = new ArrayList<>();
+                    String imgBase64 = ImageUtils.encodeToBase64(thumbnail.getImageData());
+                    String imageUri = "data:" + thumbnail.getType() + ";base64," + imgBase64;
+                    thumbnail.setImageData(null);
+                    thumbnail.setImageUri(imageUri);
+                    list.add(thumbnail);
+                    vehicleSearchDTO.setVehicleImages(list);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    vehicleSearchDTO.setVehicleImages(null);
+                }
             } else {
-                vehicleSearchDTO.setThumbnailImage("");
+                vehicleSearchDTO.setVehicleImages(null);
             }
 
-            vehicleSearchDTOS.add(vehicleSearchDTO);
+            vehicleList.add(vehicleSearchDTO);
         }
 
 
-        return vehicleSearchDTOS;
+        return vehicleList;
     }
 
     @Override
@@ -179,11 +213,11 @@ public class VehicleServiceImpl implements VehicleService {
 
     @Override
     @Transactional
-    public VehicleDetailDTO getVehicleToEdit(Long id) {
+    public Vehicle getVehicleToEdit(Long id) {
         Optional<Vehicle> optionalVehicle = vehicleRepository.findById(id);
         if (optionalVehicle.isPresent()) {
             Vehicle vehicle = optionalVehicle.get();
-            VehicleDetailDTO vehicleDetailDTO = new VehicleDetailDTO();
+            Vehicle vehicleDetailDTO = new Vehicle();
             vehicleDetailDTO.setId(vehicle.getId());
             vehicleDetailDTO.setName(vehicle.getName());
             vehicleDetailDTO.setBrand(vehicle.getBrand());
@@ -197,17 +231,21 @@ public class VehicleServiceImpl implements VehicleService {
             vehicleDetailDTO.setVehicleCondition(vehicle.getVehicleCondition());
             vehicleDetailDTO.setDescription(vehicle.getDescription());
 
-            List<VehicleImageDTO> imageDTOs = new ArrayList<>();
+            List<VehicleImage> imageDTOs = new ArrayList<>();
             List<VehicleImage> vehicleImages = vehicle.getVehicleImages();
             if (vehicleImages != null) {
                 for (VehicleImage image : vehicleImages) {
-                    VehicleImageDTO imageDTO = new VehicleImageDTO();
+                    VehicleImage imageDTO = new VehicleImage();
                     imageDTO.setId(image.getId());
                     imageDTO.setName(image.getName());
                     imageDTO.setType(image.getType());
                     imageDTO.setIsThumbnail(image.getIsThumbnail());
+
                     if (image.getImageData() != null) {
-                        imageDTO.setBase64Image(ImageUtils.encodeToBase64(image.getImageData()));
+                        String imgBase64 = ImageUtils.encodeToBase64(image.getImageData());
+                        String imageUri = "data:" + image.getType() + ";base64," + imgBase64;
+                        imageDTO.setImageUri(imageUri);
+                        imageDTO.setImageData(null);
                     }
                     imageDTOs.add(imageDTO);
                 }
@@ -221,11 +259,11 @@ public class VehicleServiceImpl implements VehicleService {
     }
 
     @Override
-    public VehicleDetailDTO getVehicleToDetail(Long id) {
+    public Vehicle getVehicleToDetail(Long id) {
         Optional<Vehicle> optionalVehicle = vehicleRepository.findById(id);
         if (optionalVehicle.isPresent()) {
             Vehicle vehicle = optionalVehicle.get();
-            VehicleDetailDTO vehicleDetailDTO = new VehicleDetailDTO();
+            Vehicle vehicleDetailDTO = new Vehicle();
             vehicleDetailDTO.setId(vehicle.getId());
             vehicleDetailDTO.setName(vehicle.getName());
             vehicleDetailDTO.setBrand(vehicle.getBrand());
@@ -239,17 +277,21 @@ public class VehicleServiceImpl implements VehicleService {
             vehicleDetailDTO.setSeatCount(vehicle.getSeatCount());
             vehicleDetailDTO.setVehicleCondition(vehicle.getVehicleCondition());
 
-            List<VehicleImageDTO> imageDTOs = new ArrayList<>();
+            List<VehicleImage> imageDTOs = new ArrayList<>();
             List<VehicleImage> vehicleImages = vehicle.getVehicleImages();
             if (vehicleImages != null) {
                 for (VehicleImage image : vehicleImages) {
-                    VehicleImageDTO imageDTO = new VehicleImageDTO();
+                    VehicleImage imageDTO = new VehicleImage();
                     imageDTO.setId(image.getId());
                     imageDTO.setName(image.getName());
                     imageDTO.setType(image.getType());
                     imageDTO.setIsThumbnail(image.getIsThumbnail());
+
                     if (image.getImageData() != null) {
-                        imageDTO.setBase64Image(ImageUtils.encodeToBase64(image.getImageData()));
+                        String imgBase64 = ImageUtils.encodeToBase64(image.getImageData());
+                        String imageUri = "data:" + image.getType() + ";base64," + imgBase64;
+                        imageDTO.setImageUri(imageUri);
+                        imageDTO.setImageData(null);
                     }
                     imageDTOs.add(imageDTO);
                 }
@@ -263,11 +305,11 @@ public class VehicleServiceImpl implements VehicleService {
     }
 
     @Override
-    public VehicleDetailDTO findVehicleToView(Long id) {
+    public Vehicle findVehicleToView(Long id) {
         Optional<Vehicle> optionalVehicle = vehicleRepository.findById(id);
         if (optionalVehicle.isPresent()) {
             Vehicle vehicle = optionalVehicle.get();
-            VehicleDetailDTO vehicleDetailDTO = new VehicleDetailDTO();
+            Vehicle vehicleDetailDTO = new Vehicle();
             vehicleDetailDTO.setId(vehicle.getId());
             vehicleDetailDTO.setName(vehicle.getName());
             vehicleDetailDTO.setBrand(vehicle.getBrand());
@@ -279,17 +321,21 @@ public class VehicleServiceImpl implements VehicleService {
             vehicleDetailDTO.setSeatCount(vehicle.getSeatCount());
             vehicleDetailDTO.setVehicleCondition(vehicle.getVehicleCondition());
 
-            List<VehicleImageDTO> imageDTOs = new ArrayList<>();
+            List<VehicleImage> imageDTOs = new ArrayList<>();
             List<VehicleImage> vehicleImages = vehicle.getVehicleImages();
             if (vehicleImages != null) {
                 for (VehicleImage image : vehicleImages) {
-                    VehicleImageDTO imageDTO = new VehicleImageDTO();
+                    VehicleImage imageDTO = new VehicleImage();
                     imageDTO.setId(image.getId());
                     imageDTO.setName(image.getName());
                     imageDTO.setType(image.getType());
                     imageDTO.setIsThumbnail(image.getIsThumbnail());
+
                     if (image.getImageData() != null) {
-                        imageDTO.setBase64Image(ImageUtils.encodeToBase64(image.getImageData()));
+                        String imgBase64 = ImageUtils.encodeToBase64(image.getImageData());
+                        String imageUri = "data:" + image.getType() + ";base64," + imgBase64;
+                        imageDTO.setImageUri(imageUri);
+                        imageDTO.setImageData(null);
                     }
                     imageDTOs.add(imageDTO);
                 }

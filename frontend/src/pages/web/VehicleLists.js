@@ -62,9 +62,11 @@ export const VehicleList = () => {
                 onClick={() => handleClickVehicle(vehicle.id)}
               >
                 <div className="h-48 overflow-hidden">
-                  {vehicle.thumbnailImage ? (
+                  {vehicle.vehicleImages &&
+                  vehicle.vehicleImages.length > 0 &&
+                  vehicle.vehicleImages[0].imageUri ? (
                     <img
-                      src={vehicle.thumbnailImage}
+                      src={vehicle.vehicleImages[0].imageUri}
                       alt={vehicle.name}
                       className="w-full h-full object-cover"
                     />

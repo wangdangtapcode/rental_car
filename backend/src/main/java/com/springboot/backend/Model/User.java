@@ -1,5 +1,7 @@
 package com.springboot.backend.Model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -36,8 +38,10 @@ public class User {
     private String status;
 
     @OneToOne(mappedBy = "user")
+    @JsonBackReference
     private Customer customer;
 
     @OneToOne(mappedBy = "user")
+    @JsonManagedReference
     private Employee employee;
 }

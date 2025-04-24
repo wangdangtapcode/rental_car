@@ -1,6 +1,5 @@
 package com.springboot.backend.Repository;
 
-import com.springboot.backend.DTO.VehicleSearchDTO;
 import com.springboot.backend.Model.Vehicle;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -24,5 +23,5 @@ public interface VehicleRepository extends JpaRepository<Vehicle,Long> {
             "AND EXISTS (SELECT 1 FROM vehicle_images vi " +
             "WHERE vi.vehicle_id = v.id AND vi.is_thumbnail = true)"
             , nativeQuery = true)
-    List<Vehicle> findViewAll();
+    List<Vehicle> findVehicleActiveAll();
 }

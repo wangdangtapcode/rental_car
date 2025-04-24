@@ -1,11 +1,21 @@
 import { IoMdNotificationsOutline } from "react-icons/io";
 import { CiUser } from "react-icons/ci";
 import { useState } from "react";
+import { useSelector, useDispatch } from "react-redux";
+import { logoutUser } from "../../../store/userSlice";
+import { useNavigate } from "react-router";
 export const Topbar = () => {
+  const navigate = useNavigate();
   const [isClickedUserIcon, setIsClickedUserIcon] = useState(false);
+  const dispatch = useDispatch();
+  const user = useSelector((state) => state.user.user);
   function toggleDropdown() {
     setIsClickedUserIcon(!isClickedUserIcon);
   }
+  const handleLogout = () => {
+    dispatch(logoutUser());
+    navigate("/login");
+  };
   return (
     <>
       <div className="fixed top 0 bg-white shadow-md z-10 w-full ">
@@ -24,9 +34,18 @@ export const Topbar = () => {
               </button>
               {isClickedUserIcon && (
                 <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-20">
-                  <div className="py-2 px-4 text-gray-700">Profile</div>
-                  <div className="py-2 px-4 text-gray-700">Settings</div>
-                  <div className="py-2 px-4 text-gray-700">Logout</div>
+                  <div className="py-2 px-4 text-gray-700">
+                    👤 {user?.fullName || "Người dùng"}
+                  </div>
+                  <div className="py-2 px-4 text-gray-700 hover:bg-gray-100 cursor-pointer">
+                    Cài đặt
+                  </div>
+                  <div
+                    className="py-2 px-4 text-red-600 hover:bg-gray-100 cursor-pointer"
+                    onClick={handleLogout}
+                  >
+                    Đăng xuất
+                  </div>
                 </div>
               )}
             </div>

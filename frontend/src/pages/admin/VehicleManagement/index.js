@@ -13,7 +13,7 @@ export const VehicleManagement = () => {
     try {
       const response = await axios.get(
         searchKey
-          ? `http://localhost:8081/api/management/vehicle/search?fullName=${searchKey}`
+          ? `http://localhost:8081/api/management/vehicle/search?name=${searchKey}`
           : "http://localhost:8081/api/management/vehicle/search/all"
       );
       console.log(response.data);
@@ -95,11 +95,19 @@ export const VehicleManagement = () => {
                 >
                   <td className="px-4 py-2">{vehicle.id}</td>
                   <td className="px-4 py-2">
-                    <img
-                      src={vehicle.thumbnailImage || ""}
-                      alt="Thumbnail"
-                      className="w-20 h-12 object-cover"
-                    />
+                    {vehicle.vehicleImages &&
+                    vehicle.vehicleImages.length > 0 &&
+                    vehicle.vehicleImages[0].imageUri ? (
+                      <img
+                        src={vehicle.vehicleImages[0].imageUri}
+                        alt={vehicle.name}
+                        className="w-20 h-20 object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-full bg-gray-200 flex items-center justify-center">
+                        <span className="text-gray-500">Không có ảnh</span>
+                      </div>
+                    )}
                   </td>
                   <td className="px-4 py-2">{vehicle.brand}</td>
                   <td className="px-4 py-2">{vehicle.name}</td>

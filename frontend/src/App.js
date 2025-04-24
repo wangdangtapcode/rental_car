@@ -1,7 +1,6 @@
 import React from "react";
 
 import "./App.css";
-
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Login } from "./pages/web/Login";
 import { Home } from "./pages/web/Home";
@@ -22,6 +21,9 @@ import { EditVehicle } from "./pages/admin/VehicleManagement/EditVehicle";
 import { DetailVehicle } from "./pages/admin/VehicleManagement/DetailVehicle";
 import { ViewVehicle } from "./pages/web/ViewVehicle";
 import { VehicleList } from "./pages/web/VehicleLists";
+import { CustomerSearch } from "./pages/admin/Rental/CustomerSearch";
+import { VehicleSearch } from "./pages/admin/Rental/VehicleSearch";
+import { ContractDraft } from "./pages/admin/Rental/Contract";
 
 function App() {
   return (
@@ -39,6 +41,17 @@ function App() {
         <Route element={<LayoutAdmin />}>
           {/*Dashboard*/}
           <Route path="/admin" element={<Dashboard />} />
+          {/* Rental*/}
+          {/* Tìm/Thêm Khách hàng */}
+          <Route path="/rental/customer" element={<CustomerSearch />} />
+
+          {/* Tìm/Chọn Xe*/}
+          <Route
+            path="/rental/vehicles/:customerId"
+            element={<VehicleSearch />}
+          />
+          <Route path="/rental/contract/draft" element={<ContractDraft />} />
+
           {/*Management*/}
           {/*Customer Management*/}
           <Route

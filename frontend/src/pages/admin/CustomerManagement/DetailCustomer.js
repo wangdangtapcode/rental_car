@@ -25,39 +25,39 @@ export const DetailCustomer = () => {
       <div className="space-y-3 text-xl">
         <div className="flex items-center space-x-2">
           <label className="font-semibold">Họ tên:</label>
-          <p>{customer.fullName}</p>
+          <p>{customer.user.fullName}</p>
         </div>
 
         <div className="flex items-center space-x-2">
           <label className="font-semibold">Email:</label>
-          <p>{customer.email}</p>
+          <p>{customer.user.email}</p>
         </div>
 
         <div className="flex items-center space-x-2">
           <label className="font-semibold">Số điện thoại:</label>
-          <p>{customer.phoneNumber}</p>
+          <p>{customer.user.phoneNumber}</p>
         </div>
 
         <div className="flex items-center space-x-2">
           <label className="font-semibold">Địa chỉ:</label>
-          <p>{customer.address}</p>
+          <p>{customer.user.address}</p>
         </div>
 
         <div className="flex items-center space-x-2">
           <label className="font-semibold">Mật khẩu:</label>
-          <p>{customer.password}</p>
+          <p>{customer.user.password}</p>
         </div>
 
         <div>
           <label className="font-semibold">Trạng thái:</label>
           <p
             className={`inline-block px-3 py-1 rounded-full text-sm font-semibold ${
-              customer.status === "ACTIVE"
+              customer.user.status === "ACTIVE"
                 ? "bg-green-100 text-green-700"
                 : "bg-red-100 text-red-700"
             }`}
           >
-            {customer.status}
+            {customer.user.status}
           </p>
         </div>
       </div>

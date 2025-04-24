@@ -30,10 +30,10 @@ public class RentalContract {
     @Column(name = "status")
     private String status;
 
-    @OneToMany(mappedBy = "rentalContract")
+    @OneToMany(mappedBy = "rentalContract",cascade = CascadeType.ALL,orphanRemoval = true)
     private List<ContractVehicleDetail> contractVehicleDetails;
 
-    @OneToMany(mappedBy = "rentalContract")
+    @OneToMany(mappedBy = "rentalContract",cascade = CascadeType.ALL,orphanRemoval = true)
     private List<Collateral> collaterals;
 
     @ManyToOne

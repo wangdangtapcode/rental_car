@@ -1,11 +1,10 @@
 package com.springboot.backend.Service.impl;
 
-import com.springboot.backend.DTO.CustomerDTO;
 import com.springboot.backend.Model.Customer;
 import com.springboot.backend.Model.User;
 import com.springboot.backend.Repository.CustomerRepository;
-import com.springboot.backend.Repository.UserRepository;
 import com.springboot.backend.Service.CustomerService;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,70 +12,65 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Service
-
+@RequiredArgsConstructor
 public class CustomerServiceImpl implements CustomerService {
     @Autowired
-    private CustomerRepository customerRepository;
-
+    private final CustomerRepository customerRepository;
 
 
     @Override
     @Transactional
-    public List<CustomerDTO> findByUserFullName(String fullName) {
-        List<Customer> customerList = customerRepository.findFirst20ByUserFullNameContaining(fullName);
-        List<CustomerDTO> customerDTOList = new ArrayList<>();
-        for(Customer customer: customerList){
-            CustomerDTO customerDTO = new CustomerDTO();
-            customerDTO.setId(customer.getId());
-            customerDTO.setFullName(customer.getUser().getFullName());
-            customerDTO.setAddress(customer.getUser().getAddress());
-            customerDTO.setEmail(customer.getUser().getEmail());
-            customerDTO.setPassword(customer.getUser().getPassword());
-            customerDTO.setStatus(customer.getUser().getStatus());
-            customerDTO.setUserType(customer.getUser().getUserType());
-            customerDTO.setPhoneNumber(customer.getUser().getPhoneNumber());
-            customerDTOList.add(customerDTO);
+    public List<Customer> findByUserFullName(String fullName) {
+        List<Customer> customers = customerRepository.findByUserFullNameContainingIgnoreCase(fullName);
+        List<Customer> customerList = new ArrayList<>();
+        for (Customer customer : customers) {
+            customer.setRentalContracts(null);
+            customerList.add(customer);
         }
-        System.out.println("OK");
-        return customerDTOList;
+        return customerList;
     }
 
     @Override
     @Transactional
-    public List<CustomerDTO> findAll() {
-        List<Customer> customerList = customerRepository.findTop20ByOrderByIdAsc();
-        List<CustomerDTO> customerDTOList = new ArrayList<>();
-        for(Customer customer: customerList){
-            CustomerDTO customerDTO = new CustomerDTO();
-            customerDTO.setId(customer.getId());
-            customerDTO.setFullName(customer.getUser().getFullName());
-            customerDTO.setAddress(customer.getUser().getAddress());
-            customerDTO.setEmail(customer.getUser().getEmail());
-            customerDTO.setPassword(customer.getUser().getPassword());
-            customerDTO.setStatus(customer.getUser().getStatus());
-            customerDTO.setUserType(customer.getUser().getUserType());
-            customerDTO.setPhoneNumber(customer.getUser().getPhoneNumber());
-            customerDTOList.add(customerDTO);
+    public List<Customer> findAll() {
+        List<Customer> customers = customerRepository.findTop20ByOrderByIdAsc();
+        List<Customer> customerList = new ArrayList<>();
+        for (Customer customer : customers) {
+            customer.setRentalContracts(null);
+            customerList.add(customer);
         }
-        System.out.println("OK");
-        return customerDTOList;
+        return customerList;
+    }
+
+    @Override
+    public Customer findById(Long id) {
+        Optional<Customer> customerOptional = customerRepository.findById(id);
+        if (customerOptional.isPresent()) {
+            Customer customer = customerOptional.get();
+            customer.setRentalContracts(null);  // Set null nếu không muốn trả về thông tin hợp đồng thuê
+            return customer;
+        } else {
+            // Nếu không tìm thấy khách hàng, có thể ném exception hoặc trả về null, tùy theo yêu cầu
+            throw new EntityNotFoundException("Customer not found with id: " + id);
+        }
     }
 
     @Override
     @Transactional
-    public Boolean createCustomer(CustomerDTO customerDTO) {
+    public Boolean createCustomer(Map<String, Object> customerData) {
 
         User user = new User();
-        user.setFullName(customerDTO.getFullName());
-        user.setEmail(customerDTO.getEmail());
-        user.setPassword(customerDTO.getPassword());
-        user.setPhoneNumber(customerDTO.getPhoneNumber());
-        user.setAddress(customerDTO.getAddress());
-        user.setUserType("CUSTOMER");
-        user.setStatus("ACTIVE");
+        user.setFullName((String) customerData.get("fullName"));
+        user.setEmail((String) customerData.get("email"));
+        user.setPassword((String) customerData.get("password"));
+        user.setPhoneNumber((String) customerData.get("phoneNumber"));
+        user.setAddress((String) customerData.get("address"));
+        user.setStatus((String) customerData.get("status"));
+        user.setUserType((String) customerData.get("userType"));
 
 //        userRepository.save(user);
 
@@ -90,16 +84,19 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     @Transactional
-    public Boolean editCustomer(CustomerDTO customerDTO) {
-        Optional<Customer> optionalCustomer = customerRepository.findById(customerDTO.getId());
+    public Boolean editCustomer(Map<String, Object> customerData) {
+        Long customerId = ((Number) customerData.get("id")).longValue();
+
+        Optional<Customer> optionalCustomer = customerRepository.findById(customerId);
         if(optionalCustomer.isPresent()){
             Customer customer = optionalCustomer.get();
-            customer.getUser().setFullName(customerDTO.getFullName());
-            customer.getUser().setEmail(customerDTO.getEmail());
-            customer.getUser().setPassword(customerDTO.getPassword());
-            customer.getUser().setPhoneNumber(customerDTO.getPhoneNumber());
-            customer.getUser().setAddress(customerDTO.getAddress());
-            customer.getUser().setStatus(customerDTO.getStatus());
+            User user = customer.getUser();
+            user.setFullName((String) customerData.get("fullName"));
+            user.setEmail((String) customerData.get("email"));
+            user.setPassword((String) customerData.get("password"));
+            user.setPhoneNumber((String) customerData.get("phoneNumber"));
+            user.setAddress((String) customerData.get("address"));
+            user.setStatus((String) customerData.get("status"));
             customerRepository.save(customer);
             return true;
         }

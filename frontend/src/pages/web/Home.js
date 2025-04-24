@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router";
+import { arrayBufferToBase64 } from "../../utils/byteToBase64";
 import axios from "axios";
 export const Home = () => {
   const navigate = useNavigate();
@@ -63,9 +64,11 @@ export const Home = () => {
                 onClick={() => handleClickVehicle(vehicle.id)}
               >
                 <div className="h-48 overflow-hidden">
-                  {vehicle.thumbnailImage ? (
+                  {vehicle.vehicleImages &&
+                  vehicle.vehicleImages.length > 0 &&
+                  vehicle.vehicleImages[0].imageUri ? (
                     <img
-                      src={vehicle.thumbnailImage}
+                      src={vehicle.vehicleImages[0].imageUri}
                       alt={vehicle.name}
                       className="w-full h-full object-cover"
                     />
@@ -75,6 +78,7 @@ export const Home = () => {
                     </div>
                   )}
                 </div>
+
                 <div className="p-4">
                   <h3 className="text-lg font-semibold mb-2">
                     {vehicle.name} {vehicle.type} {vehicle.manufactureYear}

@@ -1,8 +1,8 @@
-// const store = () => {
-//   return createStore(
-//     rootReducer,
-//     applyMiddleware(thunk)
-//   );
-// }
+import { configureStore } from "@reduxjs/toolkit";
+import userReducer from "./userSlice";
 
-// export default store;
+export const store = configureStore({
+  reducer: {
+    user: userReducer,
+  },
+});

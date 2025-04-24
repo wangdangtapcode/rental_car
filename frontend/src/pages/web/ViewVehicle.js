@@ -1,9 +1,9 @@
 import { useParams } from "react-router";
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+// import { useNavigate } from "react-router-dom";
 import axios from "axios";
 export const ViewVehicle = () => {
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
   const { id } = useParams();
   const [vehicle, setVehicle] = useState({
     id: "",
@@ -43,9 +43,7 @@ export const ViewVehicle = () => {
                 id: img.id,
                 name: img.name,
                 type: img.type,
-                url: img.base64Image
-                  ? `data:${img.type};base64,${img.base64Image}`
-                  : "",
+                url: img.imageUri ? img.imageUri : "",
                 isThumbnail: img.isThumbnail,
                 file: null,
               })),

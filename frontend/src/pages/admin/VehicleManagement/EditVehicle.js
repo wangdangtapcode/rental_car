@@ -48,9 +48,7 @@ export const EditVehicle = () => {
                 id: img.id,
                 name: img.name,
                 type: img.type,
-                url: img.base64Image
-                  ? `data:${img.type};base64,${img.base64Image}`
-                  : "",
+                url: img.imageUri ? img.imageUri : "",
                 isThumbnail: img.isThumbnail,
                 file: null, // Không có file khi tải từ backend
               })),

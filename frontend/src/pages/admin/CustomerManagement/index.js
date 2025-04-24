@@ -85,7 +85,6 @@ export const CustomerManagement = () => {
             <tbody>
               {customers.map((customer) => (
                 <tr
-                  
                   onClick={() =>
                     navigate(
                       `/admin/management/customer/detail/${customer.id}`,
@@ -96,18 +95,18 @@ export const CustomerManagement = () => {
                   }
                   className="hover:bg-gray-100 text-center divide-x divide-gray-300 cursor-pointer"
                 >
-                  <td className="px-4 py-2 ">{customer.fullName}</td>
-                  <td className="px-4 py-2">{customer.phoneNumber}</td>
-                  <td className="px-4 py-2">{customer.address}</td>
+                  <td className="px-4 py-2 ">{customer.user.fullName}</td>
+                  <td className="px-4 py-2">{customer.user.phoneNumber}</td>
+                  <td className="px-4 py-2">{customer.user.address}</td>
                   <td className="px-4 py-2">
                     <span
                       className={`px-3 py-1 rounded-full text-sm font-semibold ${
-                        customer.status === "ACTIVE"
+                        customer.user.status === "ACTIVE"
                           ? "bg-green-100 text-green-700"
                           : "bg-red-100 text-red-700"
                       }`}
                     >
-                      {customer.status}
+                      {customer.user.status}
                     </span>
                   </td>
                   <td className="px-4 py-2 flex items-center justify-center space-x-2">

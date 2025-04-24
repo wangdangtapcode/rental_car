@@ -1,23 +1,48 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { setUser } from "../../store/userSlice";
 export const Login = () => {
-  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const user = useSelector((state) => state.user.user);
+  const dispatch = useDispatch();
   const navigate = useNavigate();
+
+  // Nếu đã login thì tự động điều hướng
+  useEffect(() => {
+    if (user) {
+      if (user.userType === "EMPLOYEE") {
+        navigate("/admin");
+      } else if (user.userType === "CUSTOMER") {
+        navigate("/");
+      }
+    }
+  }, [user, navigate]);
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post("http://localhost:8081/auth/login", {
-        username,
-        password,
-      });
-      console.log(response.data);
-      if (response.data === true) {
-        console.log("Đăng nhập thành công!");
-        navigate("/admin");
+      const response = await axios.post(
+        "http://localhost:8081/api/auth/login",
+        {
+          email,
+          password,
+        }
+      );
+
+      const data = response.data;
+      console.log(data);
+      if (data && data.userType) {
+        dispatch(setUser(data));
+        alert("Đăng nhập thành công!");
+        if (data.userType === "EMPLOYEE") {
+          navigate("/admin");
+        } else if (data.userType === "CUSTOMER") {
+          navigate("/");
+        }
       } else {
-        console.log("Sai tài khoản hoặc mật khẩu.");
+        alert("Sai tài khoản hoặc mật khẩu.");
       }
     } catch (error) {
       console.error("Login error:", error.response?.data || error.message);
@@ -29,13 +54,13 @@ export const Login = () => {
       <div className="bg-white p-6 rounded-lg shadow-lg w-80">
         <h2 className="text-2xl font-semibold text-center mb-4">Đăng nhập</h2>
         <form onSubmit={handleSubmit} className="flex flex-col">
-          <label className="mb-2 text-sm font-medium">Tên đăng nhập</label>
+          <label className="mb-2 text-sm font-medium">Email</label>
           <input
-            type="text"
+            type="email"
             className="border border-gray-300 rounded-md px-3 py-2 mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            placeholder="Nhập tên đăng nhập"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
+            placeholder="Nhập Email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
             required
           />
 

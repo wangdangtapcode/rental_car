@@ -32,6 +32,14 @@ export const Sidebar = () => {
               </Link>
             </li>
             <li>
+              <Link
+                to="/rental/customer"
+                className="block px-4 py-2 hover:bg-gray-700 text-md"
+              >
+                Rental
+              </Link>
+            </li>
+            <li>
               <div
                 className="flex justify-between items-center hover:bg-gray-700 cursor-pointer"
                 onClick={toggleDropdownManagement}
