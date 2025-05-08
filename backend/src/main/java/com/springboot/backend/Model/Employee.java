@@ -1,6 +1,8 @@
 package com.springboot.backend.Model;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -23,12 +25,13 @@ public class Employee {
     @OneToOne(cascade = CascadeType.ALL)
     @MapsId
     @JoinColumn(name = "user_id")
-    @JsonBackReference
     private User user;
 
     @OneToMany(mappedBy = "employee")
+    @JsonIgnore
     private List<RentalContract> rentalContracts;
 
     @OneToMany(mappedBy = "employee")
+    @JsonIgnore
     private List<InvoiceDetail> invoiceDetails;
 }

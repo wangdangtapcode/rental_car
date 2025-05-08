@@ -1,5 +1,6 @@
 package com.springboot.backend.Model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -24,8 +25,17 @@ public class RentalContract {
     @Column(name = "end_date")
     private LocalDate endDate;
 
+    @Column(name = "created_date")
+    private LocalDate createdDate;
+
     @Column(name = "deposit_amount")
     private Float depositAmount;
+
+    @Column(name = "due_amount")
+    private Float dueAmount;
+
+    @Column(name = "total_estimated_amount")
+    private Float totalEstimatedAmount	;
 
     @Column(name = "status")
     private String status;
@@ -45,5 +55,6 @@ public class RentalContract {
     private Employee employee;
 
     @OneToMany(mappedBy = "rentalContract")
+    @JsonIgnore
     private List<InvoiceDetail> invoiceDetails;
 }

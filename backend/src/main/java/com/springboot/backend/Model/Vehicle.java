@@ -1,5 +1,6 @@
 package com.springboot.backend.Model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -51,10 +52,12 @@ public class Vehicle {
     private String status;
 
     @ManyToOne
+    @JsonIgnore
     @JoinColumn(name = "consignment_contract_id")
     private ConsignmentContract consignmentContract;
 
     @OneToMany(mappedBy = "vehicle")
+    @JsonIgnore
     private List<ContractVehicleDetail> contractVehicleDetails;
 
     @OneToMany(mappedBy = "vehicle",cascade = {CascadeType.PERSIST, CascadeType.MERGE,CascadeType.REMOVE}, orphanRemoval = true)

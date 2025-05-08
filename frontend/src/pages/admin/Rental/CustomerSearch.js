@@ -2,7 +2,6 @@ import { useNavigate } from "react-router";
 import { useState, useEffect } from "react";
 import axios from "axios";
 import { FaAngleRight } from "react-icons/fa";
-import { useSelector } from "react-redux";
 export const CustomerSearch = () => {
   const navigate = useNavigate();
   // --- State cho Tìm kiếm Khách hàng ---
@@ -130,19 +129,35 @@ export const CustomerSearch = () => {
     console.log("Selected customer:", customer);
     navigate(`/rental/vehicles/${customer.id}`, { state: { customer } });
   };
+  const handleGoToBookingSearch = () => {
+    navigate("/rental/contractSearch");
+  };
   return (
     <div className="container mx-auto p-4 space-y-6">
-      <h1 className="text-2xl font-bold mb-4">Chọn Khách Hàng Thuê Xe</h1>
+      <h1 className="text-2xl font-bold mb-4">
+        Khách hàng nhận xe/thuê xe tại chỗ
+      </h1>
 
       <div className="p-4 border rounded shadow-sm bg-white">
-        <div className="flex justify-between items-center m-5">
-          <h2 className="text-xl font-semibold mb-3">Tìm Khách Hàng </h2>
-          <button
-            onClick={handleOpenAddModal}
-            className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 text-sm text-center"
-          >
-            + Thêm Khách Hàng
-          </button>
+        <div className="flex justify-between items-center gap-4 m-5">
+          <h2 className="text-xl font-semibold mb-3">
+            Tìm Khách Hàng(Thuê tại chỗ)
+          </h2>
+          <div className="flex gap-3">
+            {" "}
+            <button
+              onClick={handleOpenAddModal}
+              className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 text-sm text-center whitespace-nowrap" // Thêm whitespace-nowrap
+            >
+              + Thêm Khách Hàng Mới
+            </button>
+            <button
+              onClick={handleGoToBookingSearch}
+              className="px-4 py-2 bg-indigo-500 text-white rounded hover:bg-indigo-600 text-sm text-center whitespace-nowrap" // Màu khác, thêm whitespace-nowrap
+            >
+              Tìm Đơn Đặt Online (Booking)
+            </button>
+          </div>
         </div>
 
         <div className="flex space-x-2 mb-3">

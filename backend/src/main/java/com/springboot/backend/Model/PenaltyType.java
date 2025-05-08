@@ -1,5 +1,6 @@
 package com.springboot.backend.Model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -29,5 +30,6 @@ public class PenaltyType {
     private String description;
 
     @OneToMany(mappedBy = "penaltyType")
+    @JsonIgnore
     private List<Penalty> penaltyList;
 }

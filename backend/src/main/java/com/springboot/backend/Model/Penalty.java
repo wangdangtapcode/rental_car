@@ -1,5 +1,6 @@
 package com.springboot.backend.Model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -23,6 +24,7 @@ public class Penalty {
 
     @ManyToOne
     @JoinColumn(name = "contract_vehicle_detail_id")
+    @JsonIgnore
     private ContractVehicleDetail contractVehicleDetail;
 
     @ManyToOne

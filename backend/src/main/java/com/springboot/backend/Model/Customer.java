@@ -1,6 +1,7 @@
 package com.springboot.backend.Model;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
@@ -20,10 +21,11 @@ public class Customer {
     @OneToOne(cascade = CascadeType.ALL)
     @MapsId
     @JoinColumn(name = "user_id")
-    @JsonManagedReference
+
     private User user;
 
     @OneToMany(mappedBy = "customer")
+    @JsonIgnore
     private List<RentalContract> rentalContracts;
 
 }

@@ -11,12 +11,9 @@ export const ContractDraft = () => {
   // State chính của trang này
   const [customer, setCustomer] = useState(null);
   const [searchParams, setSearchParams] = useState(null);
-  // State đặc biệt để quản lý xe và ghi chú tình trạng của chúng
   const [vehiclesWithNotes, setVehiclesWithNotes] = useState([]);
-
-  const [collaterals, setCollaterals] = useState([]); // Mảng các tài sản đảm bảo (chỉ là string mô tả)
-  const [newCollateralInput, setNewCollateralInput] = useState(""); // Input cho tài sản mới
-  const [depositAmount, setDepositAmount] = useState(0); // Tiền đặt cọc
+  const [collaterals, setCollaterals] = useState([]);
+  const [newCollateralInput, setNewCollateralInput] = useState("");
 
   const [isSaving, setIsSaving] = useState(false); // Trạng thái đang lưu
   const [error, setError] = useState(null); // Lỗi chung
@@ -31,7 +28,7 @@ export const ContractDraft = () => {
       console.error(
         "ContractRentalPage: Missing required data from previous step. Navigating back."
       );
-      navigate("/rental/customer", { replace: true }); // Quay về bước 1 nếu thiếu data
+      navigate("/rental/customerSearch", { replace: true }); // Quay về bước 1 nếu thiếu data
     } else {
       // Chỉ cập nhật state nếu chúng chưa được khởi tạo
       if (!customer) setCustomer(contractInputData.customer);
@@ -53,6 +50,57 @@ export const ContractDraft = () => {
       })
     );
   }, []); // Không cần dependency
+  // --- Tính toán các giá trị tiền tệ ---
+  const calculateFinancials = useCallback(() => {
+    if (!searchParams || vehiclesWithNotes.length === 0) {
+      return { total: 0, deposit: 0, due: 0 };
+    }
+
+    const start = new Date(searchParams.startDate);
+    const end = new Date(searchParams.endDate);
+    // Thêm kiểm tra ngày hợp lệ
+    if (isNaN(start.getTime()) || isNaN(end.getTime()) || end < start) {
+      console.error("Ngày bắt đầu hoặc kết thúc không hợp lệ");
+      return { total: 0, deposit: 0, due: 0 };
+    }
+
+    const diffTime = Math.abs(end - start);
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1; // Tính cả ngày bắt đầu
+
+    if (isNaN(diffDays) || diffDays <= 0) {
+      console.error("Số ngày thuê không hợp lệ:", diffDays);
+      return { total: 0, deposit: 0, due: 0 };
+    }
+
+    const totalEstimatedAmount = vehiclesWithNotes.reduce((total, item) => {
+      // Kiểm tra giá thuê hợp lệ
+      const price = Number(item.vehicle?.rentalPrice); // Lấy giá từ vehicle object
+      if (isNaN(price) || price < 0) {
+        console.warn(
+          `Giá thuê không hợp lệ cho xe ${item.vehicle?.id}:`,
+          item.vehicle?.rentalPrice
+        );
+        return total;
+      }
+      return total + price * diffDays;
+    }, 0);
+
+    const depositAmount = totalEstimatedAmount * 0.2; // Tính 20% tiền cọc
+    const dueAmount = totalEstimatedAmount - depositAmount; // Tính số tiền còn lại
+
+    return {
+      total: totalEstimatedAmount,
+      deposit: depositAmount,
+      due: dueAmount,
+    };
+  }, [searchParams, vehiclesWithNotes]);
+  // Lấy các giá trị đã tính toán
+  const {
+    total: totalEstimatedAmount,
+    deposit: depositAmount,
+    due: dueAmount,
+  } = calculateFinancials();
+
   const handleConfirmContract = useCallback(async () => {
     setError(null);
     // Kiểm tra dữ liệu cơ bản
@@ -75,39 +123,50 @@ export const ContractDraft = () => {
       setIsSaving(false);
       return;
     }
+    const now = new Date();
+    const formattedCreatedDate = now.toISOString().slice(0, 10);
+    setIsSaving(true);
     const payload = {
       customerId: customer.id,
       employeeId: user.id,
-      startDate: searchParams.startDate,
-      endDate: searchParams.endDate,
-      depositAmount: depositAmount,
-      contractVehicleDetails: vehiclesWithNotes.map((item) => {
-        if (
-          !item.vehicle ||
-          !item.vehicle.id ||
-          typeof item.vehicle.rentalPrice !== "number"
-        ) {
-          throw new Error(`Dữ liệu xe không hợp lệ: ${JSON.stringify(item)}`);
-        }
-        return {
-          vehicleId: item.vehicle.id,
-          vehicleCondition: item.conditionNotes,
-          rentalPrice: item.vehicle.rentalPrice,
-        };
-      }),
-      collaterals: collaterals.map((desc) => ({
-        description: desc,
-      })),
+      rentalContract: {
+        startDate: searchParams.startDate,
+        endDate: searchParams.endDate,
+        depositAmount: depositAmount,
+        totalEstimatedAmount: totalEstimatedAmount,
+        dueAmount: dueAmount,
+        createdDate: formattedCreatedDate,
+        contractVehicleDetails: vehiclesWithNotes.map((item) => {
+          if (
+            !item.vehicle ||
+            !item.vehicle.id ||
+            typeof item.vehicle.rentalPrice !== "number"
+          ) {
+            throw new Error(`Dữ liệu xe không hợp lệ: ${JSON.stringify(item)}`);
+          }
+          return {
+            vehicleId: item.vehicle.id,
+            vehicleCondition: item.conditionNotes,
+            rentalPrice: item.vehicle.rentalPrice,
+          };
+        }),
+        collaterals: collaterals.map((desc) => ({
+          description: desc,
+        })),
+      },
     };
 
     console.log("Payload gửi lên server:", JSON.stringify(payload, null, 2));
 
     setIsSaving(true);
     try {
-      const response = await axios.post("/api/v1/rental-contracts", payload);
+      const response = await axios.post(
+        `http://localhost:8081/api/rentalContract/create`,
+        payload
+      );
       if (response.data === true) {
         alert("Thêm hợp đồng thành công!");
-        navigate(`/rental/customer`);
+        navigate(`/rental/customerSearch`);
       } else {
         setError("Lưu hợp đồng thất bại. Phản hồi từ server không hợp lệ.");
         setIsSaving(false);
@@ -127,34 +186,10 @@ export const ContractDraft = () => {
     collaterals,
     user,
     navigate,
+    totalEstimatedAmount,
+    depositAmount,
+    dueAmount,
   ]);
-
-  // Nếu đang thiếu dữ liệu cần thiết (dù useEffect đã chạy), hiển thị loading hoặc null
-  if (!customer || !searchParams || vehiclesWithNotes.length === 0) {
-    // useEffect sẽ xử lý navigate, nên có thể trả về null hoặc một spinner
-    return (
-      <div className="container mx-auto p-4">Đang tải dữ liệu hợp đồng...</div>
-    );
-  }
-
-  // Tính tổng tiền thuê dự kiến (optional)
-  const calculateTotalRental = () => {
-    const start = new Date(searchParams.startDate);
-    const end = new Date(searchParams.endDate);
-    const diffTime = Math.abs(end - start);
-    // Tính số ngày thuê (bao gồm cả ngày bắt đầu và kết thúc)
-    // Ví dụ: thuê từ 1/1 đến 2/1 là 2 ngày
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
-
-    if (isNaN(diffDays) || diffDays <= 0) return 0;
-
-    return vehiclesWithNotes.reduce((total, item) => {
-      const price = item.vehicle.rentalPrice || 0;
-      return total + price * diffDays;
-    }, 0);
-  };
-  const totalRentalAmount = calculateTotalRental();
-  //
 
   //
   const handleNewCollateralChange = (event) => {
@@ -175,12 +210,13 @@ export const ContractDraft = () => {
       prevCollaterals.filter((_, index) => index !== indexToRemove)
     );
   };
-
-  // Xử lý thay đổi input tiền cọc
-  const handleDepositChange = (event) => {
-    const value = parseFloat(event.target.value);
-    setDepositAmount(isNaN(value) || value < 0 ? 0 : value);
-  };
+  // Nếu đang thiếu dữ liệu cần thiết
+  if (!customer || !searchParams) {
+    // Chỉ cần kiểm tra customer và searchParams ban đầu
+    return (
+      <div className="container mx-auto p-4">Đang tải dữ liệu hợp đồng...</div>
+    );
+  }
   return (
     <div className="container mx-auto p-4 space-y-6">
       {/* Tiêu đề và nút quay lại */}
@@ -236,8 +272,21 @@ export const ContractDraft = () => {
             <strong>Đến ngày:</strong>{" "}
             {new Date(searchParams.endDate).toLocaleDateString("vi-VN")}
           </p>
-          <p className="mt-2 font-semibold text-indigo-700">
-            Tổng tiền thuê dự kiến: {formatCurrency(totalRentalAmount)}
+          <p className="mt-2 font-semibold">
+            Tổng tiền thuê dự kiến:{" "}
+            <span className="text-indigo-700">
+              {formatCurrency(totalEstimatedAmount)}
+            </span>
+          </p>
+          <p className="font-semibold">
+            Tiền đặt cọc (20%):{" "}
+            <span className="text-green-700">
+              {formatCurrency(depositAmount)}
+            </span>
+          </p>
+          <p className="font-semibold">
+            Số tiền còn lại cần thanh toán:{" "}
+            <span className="text-orange-700">{formatCurrency(dueAmount)}</span>
           </p>
         </div>
       </div>
@@ -359,25 +408,27 @@ export const ContractDraft = () => {
       {/* Tiền đặt cọc */}
       {/* =========================================== */}
       <div className="border rounded p-4">
-        <label
-          htmlFor="depositAmount"
-          className="block text-lg font-semibold text-gray-700 mb-2"
-        >
-          Tiền đặt cọc <span className="text-red-500">*</span>
-        </label>
-        <input
-          type="number"
-          id="depositAmount"
-          name="depositAmount"
-          value={depositAmount}
-          onChange={handleDepositChange} // Gọi hàm cập nhật state
-          min="0"
-          placeholder="Nhập số tiền cọc"
-          required // HTML5 validation
-          className="block w-full md:w-1/2 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-        />
-        <p className="text-sm text-gray-500 mt-1">
-          Số tiền khách hàng đặt cọc khi làm hợp đồng.
+        <h3 className="block text-lg font-semibold text-gray-700 mb-2">
+          Thông tin thanh toán
+        </h3>
+        <p className="text-md">
+          Tổng tiền dự kiến:{" "}
+          <strong className="text-indigo-600">
+            {formatCurrency(totalEstimatedAmount)}
+          </strong>
+        </p>
+        <p className="text-md">
+          Tiền đặt cọc (20%):{" "}
+          <strong className="text-green-600">
+            {formatCurrency(depositAmount)}
+          </strong>
+          <span className="text-sm text-gray-500 ml-2">(Đã tính tự động)</span>
+        </p>
+        <p className="text-md">
+          Số tiền còn lại cần thanh toán khi nhận xe:{" "}
+          <strong className="text-orange-600">
+            {formatCurrency(dueAmount)}
+          </strong>
         </p>
       </div>
       {/* =========================================== */}
@@ -388,18 +439,15 @@ export const ContractDraft = () => {
           onClick={handleConfirmContract} // Gọi hàm xử lý cuối cùng
           className="px-8 py-3 bg-green-600 text-white font-bold rounded hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition duration-150 ease-in-out text-lg"
           disabled={
-            isSaving || depositAmount <= 0 || vehiclesWithNotes.length === 0
-          } // Vô hiệu hóa khi đang lưu hoặc thiếu thông tin
+            isSaving ||
+            depositAmount <= 0 ||
+            vehiclesWithNotes.length === 0 ||
+            collaterals.length === 0
+          }
         >
           {isSaving ? "Đang xử lý..." : "Xác Nhận & Lưu Hợp Đồng"}
         </button>
       </div>
-      {/* Có thể thêm thông báo phụ nếu nút bị vô hiệu hóa */}
-      {depositAmount <= 0 && (
-        <p className="text-red-500 text-sm text-right mt-1">
-          Vui lòng nhập tiền đặt cọc.
-        </p>
-      )}
       {collaterals.length === 0 && (
         <p className="text-red-500 text-sm text-right mt-1">
           Vui lòng điền tài sản đảm bảo.
@@ -408,6 +456,12 @@ export const ContractDraft = () => {
       {vehiclesWithNotes.length === 0 && (
         <p className="text-red-500 text-sm text-right mt-1">
           Không có xe nào trong hợp đồng.
+        </p>
+      )}
+      {totalEstimatedAmount <= 0 && vehiclesWithNotes.length > 0 && (
+        <p className="text-red-500 text-sm text-right mt-1">
+          Tổng tiền thuê dự kiến không hợp lệ. Kiểm tra lại ngày thuê hoặc giá
+          xe.
         </p>
       )}
     </div>

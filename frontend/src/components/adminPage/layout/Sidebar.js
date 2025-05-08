@@ -2,9 +2,10 @@ import { Link } from "react-router-dom";
 import { useState } from "react";
 import { RiArrowDropDownLine } from "react-icons/ri";
 
-export const Sidebar = () => {
+export const Sidebar = ({ isCollapsed }) => {
   const [isStaticsDropdown, setIsStaticsDropdown] = useState(false);
   const [isManagementDropdown, setIsManagementDropdown] = useState(false);
+  const sidebarWidth = isCollapsed ? "w-20" : "w-60";
   const toggleDropdownStatics = (e) => {
     console.log("clicked");
     e.preventDefault();
@@ -17,9 +18,11 @@ export const Sidebar = () => {
   };
   return (
     <>
-      <div className="fixed top-16 left-0 bg-gray-800 w-60 h-[calc(100vh-4rem)] text-white">
+      <div
+        className={`fixed top-16 left-0 bg-gray-800 ${sidebarWidth} h-[calc(100vh-4rem)] text-white transition-all duration-300`}
+      >
         <div className="p-4">
-          <h2 className="text-xl font-blod">Menu</h2>
+          {!isCollapsed && <h2 className="text-xl font-bold">Menu</h2>}
         </div>
         <nav className="mt-4">
           <ul className="space-y-2">
@@ -28,15 +31,23 @@ export const Sidebar = () => {
                 to="/admin"
                 className="block px-4 py-2 hover:bg-gray-700 text-md"
               >
-                Dashboard
+                {!isCollapsed && "Dashboard"}
               </Link>
             </li>
             <li>
               <Link
-                to="/rental/customer"
+                to="/rental/customerSearch"
                 className="block px-4 py-2 hover:bg-gray-700 text-md"
               >
-                Rental
+                {!isCollapsed && "Rental"}
+              </Link>
+            </li>
+            <li>
+              <Link
+                to="/completedRental"
+                className="block px-4 py-2 hover:bg-gray-700 text-md"
+              >
+                {!isCollapsed && "Complete Rental"}
               </Link>
             </li>
             <li>
@@ -44,12 +55,14 @@ export const Sidebar = () => {
                 className="flex justify-between items-center hover:bg-gray-700 cursor-pointer"
                 onClick={toggleDropdownManagement}
               >
-                <div className=" px-4 py-2 text-md">Management</div>
-                <button className="text-lg px-4 py-2">
-                  <RiArrowDropDownLine className="w-8 h-8" />
-                </button>
+                <div className=" px-4 py-2 text-md">
+                  {!isCollapsed && "Management"}
+                </div>
+                {!isCollapsed && (
+                  <RiArrowDropDownLine className="w-8 h-8 mr-2" />
+                )}
               </div>
-              {isManagementDropdown && (
+              {!isCollapsed && isManagementDropdown && (
                 <ul className="pl-8 space-y-2">
                   <li>
                     <Link
@@ -75,12 +88,14 @@ export const Sidebar = () => {
                 className="flex justify-between items-center hover:bg-gray-700 cursor-pointer"
                 onClick={toggleDropdownStatics}
               >
-                <div className=" px-4 py-2 text-md">Statistics</div>
-                <button className="text-lg px-4 py-2">
-                  <RiArrowDropDownLine className="w-8 h-8" />
-                </button>
+                <div className=" px-4 py-2 text-md">
+                  {!isCollapsed && "Statistics"}
+                </div>
+                {!isCollapsed && (
+                  <RiArrowDropDownLine className="w-8 h-8 mr-2" />
+                )}
               </div>
-              {isStaticsDropdown && (
+              {!isCollapsed && isStaticsDropdown && (
                 <ul className="pl-8 space-y-2">
                   <li>
                     <Link

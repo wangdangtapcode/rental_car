@@ -4,7 +4,8 @@ import { useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { logoutUser } from "../../../store/userSlice";
 import { useNavigate } from "react-router";
-export const Topbar = () => {
+import { TiThMenu } from "react-icons/ti";
+export const Topbar = ({ toggleSidebar }) => {
   const navigate = useNavigate();
   const [isClickedUserIcon, setIsClickedUserIcon] = useState(false);
   const dispatch = useDispatch();
@@ -20,7 +21,16 @@ export const Topbar = () => {
     <>
       <div className="fixed top 0 bg-white shadow-md z-10 w-full ">
         <div className="flex items-center w-full justify-between px-4 py-2 h-16">
-          <div className="text-lg font-bold text-black">Logo</div>
+          <div className="flex items-center space-x-4">
+            {/* Nút bật/tắt sidebar */}
+            <button
+              onClick={toggleSidebar}
+              className="text-gray-600 hover:text-gray-800 focus:outline-none"
+            >
+              <TiThMenu className="w-6 h-6" />
+            </button>
+            <div className="text-lg font-bold text-black">Logo</div>
+          </div>
           <div className="flex items-center space-x-4">
             <button className="p-2 text-gray-600 hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-300 rounded-full ">
               <IoMdNotificationsOutline className="w-6 h-6" />

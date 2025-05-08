@@ -33,21 +33,13 @@ public class RentalContractServiceImpl implements RentalContractService {
     public boolean createRentalContract(
             Long customerId,
             Long employeeId,
-            String startDateStr,
-            String endDateStr,
-            Float depositAmount,
+            RentalContract rentalContract,
             List<Map<String, Object>> contractVehicleDetails,
             List<Map<String, Object>> collaterals
     ) {
 
-        if (customerId == null || employeeId == null || startDateStr == null || endDateStr == null || depositAmount == null) {
+        if (customerId == null || employeeId == null ) {
             throw new IllegalArgumentException("Required fields are missing");
-        }
-        LocalDate startDate = LocalDate.parse(startDateStr);
-        LocalDate endDate = LocalDate.parse(endDateStr);
-
-        if (endDate.isBefore(startDate)) {
-            throw new IllegalArgumentException("End date must be after or the same as start date");
         }
 
         Customer customer = customerRepository.findByUserId(customerId)
@@ -57,11 +49,6 @@ public class RentalContractServiceImpl implements RentalContractService {
                 .orElseThrow(() -> new EntityNotFoundException("Employee not found with ID: " + employeeId));
 
 
-        RentalContract rentalContract = new RentalContract();
-        rentalContract.setStartDate(startDate);
-        rentalContract.setEndDate(endDate);
-        rentalContract.setDepositAmount(depositAmount.floatValue());
-        rentalContract.setStatus("ACTIVE");
         rentalContract.setCustomer(customer);
         rentalContract.setEmployee(employee);
 
@@ -117,5 +104,15 @@ public class RentalContractServiceImpl implements RentalContractService {
             e.printStackTrace();
             return false;
         }
+    }
+
+    @Override
+    public List<RentalContract> getContractBookingByFullNameCustomer(String name) {
+        return rentalContractRepository.findByCustomerNameAndStatusWithFetch(name,"BOOKING");
+    }
+
+    @Override
+    public List<RentalContract> getContractActiveByFullNameCustomer(String name) {
+        return rentalContractRepository.findByCustomerNameAndStatusWithFetch(name,"ACTIVE");
     }
 }

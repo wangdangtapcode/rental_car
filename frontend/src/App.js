@@ -24,6 +24,10 @@ import { VehicleList } from "./pages/web/VehicleLists";
 import { CustomerSearch } from "./pages/admin/Rental/CustomerSearch";
 import { VehicleSearch } from "./pages/admin/Rental/VehicleSearch";
 import { ContractDraft } from "./pages/admin/Rental/Contract";
+import { SearchContractPage } from "./pages/admin/CompletedRental/SearchContract";
+import { ContractDetailPage } from "./pages/admin/CompletedRental/ContractDetail";
+import { Invoice } from "./pages/admin/CompletedRental/Invoice";
+import { SearchContractBooked } from "./pages/admin/Rental/SearchContractBooked";
 
 function App() {
   return (
@@ -43,15 +47,28 @@ function App() {
           <Route path="/admin" element={<Dashboard />} />
           {/* Rental*/}
           {/* Tìm/Thêm Khách hàng */}
-          <Route path="/rental/customer" element={<CustomerSearch />} />
-
+          <Route path="/rental/customerSearch" element={<CustomerSearch />} />
+          <Route
+            path="/rental/contractSearch"
+            element={<SearchContractBooked />}
+          />
           {/* Tìm/Chọn Xe*/}
           <Route
             path="/rental/vehicles/:customerId"
             element={<VehicleSearch />}
           />
           <Route path="/rental/contract/draft" element={<ContractDraft />} />
+          {/* Completed Rental*/}
+          <Route path="/completedRental" element={<SearchContractPage />} />
 
+          <Route
+            path="/completedRental/contract/:contractId"
+            element={<ContractDetailPage />}
+          />
+          <Route
+            path="/completedRental/invoice/:contractId"
+            element={<Invoice />}
+          />
           {/*Management*/}
           {/*Customer Management*/}
           <Route

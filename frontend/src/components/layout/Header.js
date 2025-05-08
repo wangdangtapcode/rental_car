@@ -3,9 +3,16 @@ import { LiaCarSideSolid } from "react-icons/lia";
 import { useSelector, useDispatch } from "react-redux";
 import { logoutUser } from "../../store/userSlice";
 import { useNavigate } from "react-router";
+import { useEffect } from "react";
 export const Header = () => {
   const navigate = useNavigate();
   const user = useSelector((state) => state.user.user);
+  console.log("User in Header:", user);
+  useEffect(() => {
+    if (!user) {
+      navigate("/login");
+    }
+  }, [user, navigate]);
   const dispatch = useDispatch();
   const handleLogout = () => {
     dispatch(logoutUser());
@@ -32,7 +39,7 @@ export const Header = () => {
             onClick={handleLogout}
             className="bg-white text-blue-600 px-4 py-1 rounded-lg mr-2 hover:bg-gray-200"
           >
-            Logout
+            Logout {user.fullname}
           </button>
         ) : (
           <Link to="/login">

@@ -109,7 +109,7 @@ public class VehicleServiceImpl implements VehicleService {
 
     @Override
     public List<Vehicle> findByName(String name) {
-        List<Vehicle> vehicles = vehicleRepository.findFirst20ByNameContaining(name);
+        List<Vehicle> vehicles = vehicleRepository.findFirst20ByNameContainingIgnoreCase(name);
         List<Vehicle> vehicleList = new ArrayList<>();
 
         for (Vehicle vehicle : vehicles) {
@@ -123,7 +123,9 @@ public class VehicleServiceImpl implements VehicleService {
             vehicleSearchDTO.setOwnerType(vehicle.getOwnerType());
             vehicleSearchDTO.setStatus(vehicle.getStatus());
             vehicleSearchDTO.setRentalPrice(vehicle.getRentalPrice());
+
             VehicleImage thumbnail = vehicleImageRepository.findByVehicleIdAndIsThumbnailIsTrue(vehicle.getId());
+
             if (thumbnail != null ) {
                 try {
                     List<VehicleImage> list = new ArrayList<>();

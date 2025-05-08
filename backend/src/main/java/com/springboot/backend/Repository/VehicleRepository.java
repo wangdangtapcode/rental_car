@@ -9,7 +9,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 @Repository
 public interface VehicleRepository extends JpaRepository<Vehicle,Long> {
-    List<Vehicle> findFirst20ByNameContaining(String name);
+    List<Vehicle> findFirst20ByNameContainingIgnoreCase(String name);
     List<Vehicle> findTop20ByOrderByIdAsc();
     @Query(value = "SELECT * FROM vehicles v " +
             "WHERE v.status = 'ACTIVE' " +

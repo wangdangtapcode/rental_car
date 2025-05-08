@@ -66,36 +66,6 @@ VALUES
 (14, 'Honda City', '52D-34567', 'Honda', 'Sedan', 5, 2019, 'Honda City là lựa chọn lý tưởng cho khách hàng trẻ năng động. Với thiết kế thể thao, động cơ tiết kiệm và khả năng xử lý linh hoạt, City đáp ứng tốt nhu cầu di chuyển trong đô thị. Nội thất đơn giản nhưng tiện nghi, dễ sử dụng.', 580000.0, 'GOOD', 'PARTNER', 'INACTIVE', 5),
 (15, 'Mazda 3', '52E-45678', 'Mazda', 'Sedan', 5, 2020, 'Mazda 3 mang đậm phong cách thiết kế KODO sắc sảo, nội thất hiện đại như một chiếc xe sang. Hệ thống cách âm tốt, cảm giác lái mượt mà và tiết kiệm nhiên liệu. Đây là mẫu xe rất được ưa chuộng trong phân khúc sedan hạng C.', 750000.0, 'GOOD', 'PARTNER', 'INACTIVE', 6);
 
--- Insert into vehicle_images
-INSERT INTO vehicle_images(id, image_url,is_thumbnail, vehicle_id)
-VALUES
-(1, 'http://localhost:8081/uploads/vehicles/1/toyota-innova-2020-danhgiaxe2-225317.jpg',1, 1),
-(2, 'http://localhost:8081/uploads/vehicles/1/toyota-innova-2020-danhgiaxe3-225325.jpg',0, 1),
-(3, 'http://localhost:8081/uploads/vehicles/1/toyota-innova-2020-danhgiaxe30-225901.jpg',0, 1),
-(4, 'http://localhost:8081/uploads/vehicles/1/toyota-innova-2020-danhgiaxe53-225709.jpg',0, 1),
-(5, 'http://localhost:8081/uploads/vehicles/2/CRV-L-2021-3-1.jpg',1, 2),
-(6, 'http://localhost:8081/uploads/vehicles/2/CRV-L-2021-4-1.jpg',0, 2),
-(7, 'http://localhost:8081/uploads/vehicles/3/hyundai-accent-7.jpg',1, 3),
-(8, 'http://localhost:8081/uploads/vehicles/3/hyundai-accent-13.jpg',0, 3),
-(9, 'http://localhost:8081/uploads/vehicles/3/noi-that-hyundai-accent.jpg',0, 3),
-(10, 'http://localhost:8081/uploads/vehicles/4/1920~9861684384988_2e_geC2olNpbhwAu1X9O2DXT.jpg',1, 4),
-(11, 'http://localhost:8081/uploads/vehicles/4/z3630396735760-200fdf34d1b81421b5a03c8dc6ed9b9e.jpg',0, 4),
-(12, 'http://localhost:8081/uploads/vehicles/4/z3630396774159-69352f84fe65ad069f71b2f53de13ce3.jpg',0, 4),
-(13, 'http://localhost:8081/uploads/vehicles/5/54846700956f6e31377e.jpg',1, 5),
-(14, 'http://localhost:8081/uploads/vehicles/5/ford-ranger-2020-new_1.jpg',0, 5),
-(15, 'http://localhost:8081/uploads/vehicles/5/noi-that-ford-ranger-2020.jpg',0, 5),
-(16, 'http://localhost:8081/uploads/vehicles/6/dien-mao-sang-trong-cua-xe-mazda-cx-5-2021.jpg',1, 6),
-(17, 'http://localhost:8081/uploads/vehicles/6/noi-that-cua-mazda-cx-5-2021-vo-cung-sang-trong-hien-dai.jpg',0, 6),
-(18, 'http://localhost:8081/uploads/vehicles/7/ngoai-that-xe-toyota-vios-2018.jpg',1, 7),
-(19, 'http://localhost:8081/uploads/vehicles/7/noi-that-xe-toyota-vios-2018.jpg',0, 7),
-(20, 'http://localhost:8081/uploads/vehicles/8/img_7761-001304.jpg',1, 8),
-(21, 'http://localhost:8081/uploads/vehicles/8/danhgiaxe.com-vinfast-lux-a2.0-16-124409.jpg',0, 8),
-(22, 'http://localhost:8081/uploads/vehicles/8/danhgiaxe.com-vinfast-lux-a2.0-5-123408.jpg',0, 8),
-(23, 'http://localhost:8081/uploads/vehicles/9/mitsubishi-xpander-2021-gia-ban-moi-nhat-danh-gia-thong-so-ky-thuat-3.jpg',1, 9),
-(24, 'http://localhost:8081/uploads/vehicles/10/suzuki-ertiga-2020-e1607310082587.jpg.pagespeed.ce.zDqIWDRHgT.jpg',1, 10),
-(25, 'http://localhost:8081/uploads/vehicles/10/noi-that-suzuki-ertiga-2020-e1607330698891.jpg',0, 10);
-
-
 -- Insert into payment_partners
 INSERT INTO payment_partners (id, period, total_rental_days, start_period, end_period, total_amout, status, created_date)
 VALUES
@@ -156,9 +126,9 @@ VALUES
 (3, 'Sổ hồng bản sao', 3),
 (4, 'CMND bản sao', 4),
 (5, 'Bằng lái xe bản sao', 5),
-(6, 'Hộ khẩu bản sao', 6);vehicle_images
+(6, 'Hộ khẩu bản sao', 6);
 -- Insert into invoice_details
-INSERT INTO invoice_details (id, payment_date, penalty_amount, base_amount, total_amount, rental_contract_id, employee_id)
+INSERT INTO invoice_details (id, payment_date, penalty_amount, due_amount, total_amount, rental_contract_id, employee_id)
 VALUES
 (1, '2025-04-08', 500000.0, 1800000.0, 2300000.0, 1, 10),
 (2, '2025-04-16', 1000000.0, 1600000.0, 2600000.0, 2, 10),

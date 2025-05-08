@@ -1,5 +1,6 @@
 package com.springboot.backend.Model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -20,7 +21,7 @@ public class ContractVehicleDetail {
     @Column(name = "rental_price")
     private Float rentalPrice;
 
-    @ManyToOne
+    @ManyToOne(cascade = {CascadeType.MERGE, CascadeType.PERSIST})
     @JoinColumn(name = "vehicle_id")
     private Vehicle vehicle;
 
@@ -29,6 +30,7 @@ public class ContractVehicleDetail {
 
     @ManyToOne
     @JoinColumn(name = "rental_contract_id")
+    @JsonIgnore
     private RentalContract rentalContract;
 
 }

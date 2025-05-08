@@ -1,5 +1,6 @@
 package com.springboot.backend.Model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -20,6 +21,7 @@ public class Collateral {
     private String description;
 
     @ManyToOne
+    @JsonIgnore
     @JoinColumn(name = "rental_contract_id")
     private RentalContract rentalContract;
 

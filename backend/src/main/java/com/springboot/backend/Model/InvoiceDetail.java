@@ -1,5 +1,6 @@
 package com.springboot.backend.Model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -23,17 +24,17 @@ public class InvoiceDetail {
     @Column(name = "penalty_amount")
     private Float penaltyAmount;
 
-    @Column(name = "base_amount")
-    private Float baseAmount;
+    @Column(name = "due_amount")
+    private Float dueAmount;
 
     @Column(name = "total_amount")
     private Float totalAmount;
 
-    @ManyToOne
+    @ManyToOne(cascade = {CascadeType.MERGE})
     @JoinColumn(name = "rental_contract_id")
     private RentalContract rentalContract;
 
-    @ManyToOne
+    @ManyToOne(cascade = {CascadeType.MERGE, CascadeType.PERSIST})
     @JoinColumn(name = "employee_id")
     private Employee employee;
 }

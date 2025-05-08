@@ -189,7 +189,7 @@ export const VehicleSearch = () => {
           {error}
         </div>
         <button
-          onClick={() => navigate("/rental/customer")}
+          onClick={() => navigate("/rental/customerSearch")}
           className="text-blue-600 hover:underline"
         >
           Quay lại chọn khách hàng
@@ -203,7 +203,7 @@ export const VehicleSearch = () => {
       <div className="container mx-auto p-4">
         Không có thông tin khách hàng.{" "}
         <button
-          onClick={() => navigate("/rental/customer")}
+          onClick={() => navigate("/rental/customerSearch")}
           className="text-blue-600 hover:underline"
         >
           Quay lại
@@ -223,7 +223,7 @@ export const VehicleSearch = () => {
             {customer.user.fullName} ({customer.user.phoneNumber})
           </div>
           <button
-            onClick={() => navigate("/rental/customer")}
+            onClick={() => navigate("/rental/customerSearch")}
             className="text-sm text-blue-600 hover:underline font-medium"
           >
             Chọn KH khác

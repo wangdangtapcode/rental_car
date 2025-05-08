@@ -24,7 +24,7 @@ public class VehicleController {
         return vehicleService.findToViewHome(count);
     }
     @GetMapping(value = "/api/vehicle/all")
-    public List<Vehicle> findToViewHome() {
+    public List<Vehicle> findToViewHomeAll() {
         return vehicleService.findVehicleActiveAll();
     }
     @GetMapping(value = "/api/vehicle/view/{id}")
@@ -42,7 +42,7 @@ public class VehicleController {
     }
 
     @PostMapping(value = "/api/management/vehicle/add",consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public boolean CreateVehicle(
+    public boolean createVehicle(
             @RequestParam("vehicle") String vehicleJson,
             @RequestParam(value = "vehicleImages", required = false) List<MultipartFile> imageFiles
     )throws IOException {
@@ -67,7 +67,7 @@ public class VehicleController {
         return vehicleService.getVehicleToEdit(id);
     }
     @PostMapping(value = "/api/management/vehicle/edit/{id}",consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public boolean EditVehicle(
+    public boolean editVehicle(
             @PathVariable("id") Long id,
             @RequestParam("vehicle") String vehicleJson,
             @RequestParam(value = "vehicleImages", required = false) List<MultipartFile> imageFiles
@@ -105,7 +105,7 @@ public class VehicleController {
         return vehicleService.getVehicleToDetail(id);
     }
     @DeleteMapping(value = "/api/management/vehicle/del/{id}")
-    public boolean DeleteVehicle(@PathVariable Long id){
+    public boolean deleteVehicle(@PathVariable Long id){
         return vehicleService.deleteVehicle(id);
     }
 
