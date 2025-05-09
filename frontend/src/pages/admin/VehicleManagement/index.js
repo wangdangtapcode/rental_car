@@ -96,16 +96,27 @@ export const VehicleManagement = () => {
                   <td className="px-4 py-2">{vehicle.id}</td>
                   <td className="px-4 py-2">
                     {vehicle.vehicleImages &&
-                    vehicle.vehicleImages.length > 0 &&
-                    vehicle.vehicleImages[0].imageUri ? (
-                      <img
-                        src={vehicle.vehicleImages[0].imageUri}
-                        alt={vehicle.name}
-                        className="w-20 h-20 object-cover"
-                      />
+                    vehicle.vehicleImages.length > 0 ? (
+                      (() => {
+                        const thumbnail = vehicle.vehicleImages.find(
+                          (img) => img.isThumbnail
+                        );
+                        return (
+                          thumbnail &&
+                          thumbnail.imageUri && (
+                            <img
+                              src={thumbnail.imageUri}
+                              alt={vehicle.name}
+                              className="w-20 h-20 object-cover"
+                            />
+                          )
+                        );
+                      })()
                     ) : (
                       <div className="w-full h-full bg-gray-200 flex items-center justify-center">
-                        <span className="text-gray-500">Không có ảnh</span>
+                        <span className="text-gray-500">
+                          Không có ảnh chính
+                        </span>
                       </div>
                     )}
                   </td>
@@ -134,7 +145,10 @@ export const VehicleManagement = () => {
                       onClick={(e) => {
                         e.stopPropagation();
                         navigate(
-                          `/admin/management/vehicle/edit/${vehicle.id}`
+                          `/admin/management/vehicle/edit/${vehicle.id}`,
+                          {
+                            state: { vehicle },
+                          }
                         );
                       }}
                     />

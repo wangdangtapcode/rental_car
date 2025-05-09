@@ -69,125 +69,41 @@ public class VehicleServiceImpl implements VehicleService {
     @Override
     public List<Vehicle> findVehicleActiveAll() {
         List<Vehicle> vehicles = vehicleRepository.findVehicleActiveAll();
-        List<Vehicle> vehicleList = new ArrayList<>();
         for (Vehicle vehicle : vehicles) {
-            Vehicle vehicleSearchDTO = new Vehicle();
-            vehicleSearchDTO.setId(vehicle.getId());
-            vehicleSearchDTO.setName(vehicle.getName());
-            vehicleSearchDTO.setBrand(vehicle.getBrand());
-            vehicleSearchDTO.setType(vehicle.getType());
-            vehicleSearchDTO.setRentalPrice(vehicle.getRentalPrice());
-            vehicleSearchDTO.setLicensePlate(vehicle.getLicensePlate());
-            vehicleSearchDTO.setVehicleCondition(vehicle.getVehicleCondition());
-            vehicleSearchDTO.setSeatCount(vehicle.getSeatCount());
-            vehicleSearchDTO.setManufactureYear(vehicle.getManufactureYear());
-            vehicleSearchDTO.setDescription(vehicle.getDescription());
-            VehicleImage thumbnail = vehicleImageRepository.findByVehicleIdAndIsThumbnailIsTrue(vehicle.getId());
-            if (thumbnail != null ) {
-                try {
-                    List<VehicleImage> list = new ArrayList<>();
-                    String imgBase64 = ImageUtils.encodeToBase64(thumbnail.getImageData());
-                    String imageUri = "data:" + thumbnail.getType() + ";base64," + imgBase64;
-                    thumbnail.setImageData(null);
-                    thumbnail.setImageUri(imageUri);
-                    list.add(thumbnail);
-                    vehicleSearchDTO.setVehicleImages(list);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    vehicleSearchDTO.setVehicleImages(null);
-                }
-            } else {
-                vehicleSearchDTO.setVehicleImages(null);
+            for (VehicleImage vehicleImage : vehicle.getVehicleImages()) {
+                String imgBase64 = ImageUtils.encodeToBase64(vehicleImage.getImageData());
+                String imageUri = "data:" + vehicleImage.getType() + ";base64," + imgBase64;
+                vehicleImage.setImageData(null);
+                vehicleImage.setImageUri(imageUri);
             }
-
-            vehicleList.add(vehicleSearchDTO);
         }
-
-
-        return vehicleList;
+        return vehicles;
     }
 
     @Override
     public List<Vehicle> findByName(String name) {
         List<Vehicle> vehicles = vehicleRepository.findFirst20ByNameContainingIgnoreCase(name);
-        List<Vehicle> vehicleList = new ArrayList<>();
-
         for (Vehicle vehicle : vehicles) {
-            Vehicle vehicleSearchDTO = new Vehicle();
-            vehicleSearchDTO.setId(vehicle.getId());
-            vehicleSearchDTO.setName(vehicle.getName());
-            vehicleSearchDTO.setBrand(vehicle.getBrand());
-            vehicleSearchDTO.setType(vehicle.getType());
-            vehicleSearchDTO.setManufactureYear(vehicle.getManufactureYear());
-            vehicleSearchDTO.setLicensePlate(vehicle.getLicensePlate());
-            vehicleSearchDTO.setOwnerType(vehicle.getOwnerType());
-            vehicleSearchDTO.setStatus(vehicle.getStatus());
-            vehicleSearchDTO.setRentalPrice(vehicle.getRentalPrice());
-
-            VehicleImage thumbnail = vehicleImageRepository.findByVehicleIdAndIsThumbnailIsTrue(vehicle.getId());
-
-            if (thumbnail != null ) {
-                try {
-                    List<VehicleImage> list = new ArrayList<>();
-                    String imgBase64 = ImageUtils.encodeToBase64(thumbnail.getImageData());
-                    String imageUri = "data:" + thumbnail.getType() + ";base64," + imgBase64;
-                    thumbnail.setImageData(null);
-                    thumbnail.setImageUri(imageUri);
-                    list.add(thumbnail);
-                    vehicleSearchDTO.setVehicleImages(list);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    vehicleSearchDTO.setVehicleImages(null);
-                }
-            } else {
-                vehicleSearchDTO.setVehicleImages(null);
+            for (VehicleImage vehicleImage : vehicle.getVehicleImages()) {
+                String imgBase64 = ImageUtils.encodeToBase64(vehicleImage.getImageData());
+                String imageUri = "data:" + vehicleImage.getType() + ";base64," + imgBase64;
+                vehicleImage.setImageUri(imageUri);
             }
-
-            vehicleList.add(vehicleSearchDTO);
         }
-
-
-        return vehicleList;
+        return vehicles;
     }
 
     @Override
     public List<Vehicle> findAll() {
         List<Vehicle> vehicles = vehicleRepository.findTop20ByOrderByIdAsc();
-        List<Vehicle> vehicleList = new ArrayList<>();
         for (Vehicle vehicle : vehicles) {
-            Vehicle vehicleSearchDTO = new Vehicle();
-            vehicleSearchDTO.setId(vehicle.getId());
-            vehicleSearchDTO.setName(vehicle.getName());
-            vehicleSearchDTO.setBrand(vehicle.getBrand());
-            vehicleSearchDTO.setType(vehicle.getType());
-            vehicleSearchDTO.setManufactureYear(vehicle.getManufactureYear());
-            vehicleSearchDTO.setLicensePlate(vehicle.getLicensePlate());
-            vehicleSearchDTO.setOwnerType(vehicle.getOwnerType());
-            vehicleSearchDTO.setStatus(vehicle.getStatus());
-            vehicleSearchDTO.setRentalPrice(vehicle.getRentalPrice());
-            VehicleImage thumbnail = vehicleImageRepository.findByVehicleIdAndIsThumbnailIsTrue(vehicle.getId());
-            if (thumbnail != null ) {
-                try {
-                    List<VehicleImage> list = new ArrayList<>();
-                    String imgBase64 = ImageUtils.encodeToBase64(thumbnail.getImageData());
-                    String imageUri = "data:" + thumbnail.getType() + ";base64," + imgBase64;
-                    thumbnail.setImageData(null);
-                    thumbnail.setImageUri(imageUri);
-                    list.add(thumbnail);
-                    vehicleSearchDTO.setVehicleImages(list);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    vehicleSearchDTO.setVehicleImages(null);
-                }
-            } else {
-                vehicleSearchDTO.setVehicleImages(null);
+            for (VehicleImage vehicleImage : vehicle.getVehicleImages()) {
+                String imgBase64 = ImageUtils.encodeToBase64(vehicleImage.getImageData());
+                String imageUri = "data:" + vehicleImage.getType() + ";base64," + imgBase64;
+                vehicleImage.setImageUri(imageUri);
             }
-
-            vehicleList.add(vehicleSearchDTO);
         }
-
-
-        return vehicleList;
+        return vehicles;
     }
 
     @Override

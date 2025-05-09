@@ -15,6 +15,11 @@ public interface RentalContractService {
             List<Map<String, Object>> contractVehicleDetails,
             List<Map<String, Object>> collaterals
             );
+    boolean updateContract(
+            Long employeeId,
+            Long rentalContractId,
+            List<Map<String, Object>> updatedVehicleConditions
+    );
     List<RentalContract> getContractBookingByFullNameCustomer(String name);
     List<RentalContract> getContractActiveByFullNameCustomer(String name);
 }

@@ -11,36 +11,6 @@ export const VehicleSearch = () => {
   const [customer, setCustomer] = useState(initialCustomer);
   const [isLoadingCustomer, setIsLoadingCustomer] = useState(!initialCustomer);
   const [error, setError] = useState(null);
-  useEffect(() => {
-    const fetchCustomer = async () => {
-      if (!customer) {
-        setIsLoadingCustomer(true);
-        setError(null);
-
-        console.log("Fetching customer details for ID:", customerId);
-
-        try {
-          const response = await axios.get(
-            `http://localhost:8081/api/management/customer/search/${customerId}`
-          );
-          if (response.data) {
-            console.log(response.data);
-            setCustomer(response.data);
-          } else {
-            setError(`Không tìm thấy khách hàng với ID: ${customerId}.`);
-          }
-        } catch (err) {
-          setError("Có lỗi xảy ra khi tải thông tin khách hàng.");
-          console.error(err);
-        } finally {
-          setIsLoadingCustomer(false);
-        }
-      } else {
-        setIsLoadingCustomer(false);
-      }
-    };
-    fetchCustomer();
-  }, [customer, customerId]);
   // xe
 
   const [availableVehicles, setAvailableVehicles] = useState([]);
@@ -321,13 +291,22 @@ export const VehicleSearch = () => {
                 >
                   <div className="mr-3 flex-shrink-0 w-24 h-24 md:w-32 md:h-32">
                     {item.vehicle.vehicleImages &&
-                    item.vehicle.vehicleImages.length > 0 &&
-                    item.vehicle.vehicleImages[0].imageUri ? (
-                      <img
-                        src={item.vehicle.vehicleImages[0].imageUri}
-                        alt={item.vehicle.name}
-                        className="w-full h-full object-cover rounded"
-                      />
+                    item.vehicle.vehicleImages.length > 0 ? (
+                      (() => {
+                        const thumbnail = item.vehicle.vehicleImages.find(
+                          (img) => img.isThumbnail
+                        );
+                        return (
+                          thumbnail &&
+                          thumbnail.imageUri && (
+                            <img
+                              src={thumbnail.imageUri}
+                              alt={thumbnail.name}
+                              className="w-full h-full object-cover rounded"
+                            />
+                          )
+                        );
+                      })()
                     ) : (
                       <div className="w-full h-full bg-gray-200 rounded flex items-center justify-center">
                         <span className="text-gray-400 text-xs text-center">
@@ -379,14 +358,22 @@ export const VehicleSearch = () => {
                 className="border rounded p-3 flex flex-col md:flex-row justify-between md:items-center bg-white shadow-sm hover:shadow-md transition-shadow"
               >
                 <div className="mr-3 flex-shrink-0 w-24 h-24 md:w-32 md:h-32">
-                  {vehicle.vehicleImages &&
-                  vehicle.vehicleImages.length > 0 &&
-                  vehicle.vehicleImages[0].imageUri ? (
-                    <img
-                      src={vehicle.vehicleImages[0].imageUri}
-                      alt={vehicle.name}
-                      className="w-full h-full object-cover rounded"
-                    />
+                  {vehicle.vehicleImages && vehicle.vehicleImages.length > 0 ? (
+                    (() => {
+                      const thumbnail = vehicle.vehicleImages.find(
+                        (img) => img.isThumbnail
+                      );
+                      return (
+                        thumbnail &&
+                        thumbnail.imageUri && (
+                          <img
+                            src={thumbnail.imageUri}
+                            alt={vehicle.name}
+                            className="w-full h-full object-cover rounded"
+                          />
+                        )
+                      );
+                    })()
                   ) : (
                     <div className="w-full h-full bg-gray-200 rounded flex items-center justify-center">
                       <span className="text-gray-400 text-xs text-center">

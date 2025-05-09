@@ -37,6 +37,20 @@ public class RentalContractController {
                 customerId, employeeId, rentalContract, contractVehicleDetails, collaterals
         );
     }
+
+
+    @PostMapping(value = "/api/rentalContract/update/{id}")
+    public boolean updateContract( @PathVariable("id") Long id,@RequestBody Map<String, Object> payload){
+        Long employeeId = ((Number) payload.get("employeeId")).longValue();
+        Long RentalContractId = id;
+
+        List<Map<String, Object>> updatedVehicleConditions = (List<Map<String, Object>>) payload.get("updatedVehicleConditions");
+        return rentalContractService.updateContract(employeeId,
+                RentalContractId,
+                updatedVehicleConditions);
+    }
+
+
     @GetMapping(value = "/api/rental/contractSearch")
     public List<RentalContract> getContractBookingByFullNameCustomer(@RequestParam String name){
         return rentalContractService.getContractBookingByFullNameCustomer(name);

@@ -36,8 +36,23 @@ export const SearchContractBooked = () => {
       }
     }, 500);
   }, [searchTerm]);
-  const handleSelectContract = (contractId) => {
-    // navigate(`/completedRental/contract/${contractId}`);
+  const handleSelectContract = (contract) => {
+    console.log("Selected contract:", contract);
+    const transformedState = {
+      customer: contract.customer,
+      searchParams: {
+        startDate: contract.startDate,
+        endDate: contract.endDate,
+      },
+      selectedVehicles: contract.contractVehicleDetails.map((detail) => ({
+        vehicle: detail.vehicle,
+        conditionNotes:
+          detail.vehicle.vehicleCondition || "Như hiện trạng khi đặt",
+      })),
+      originalContractData: contract,
+      mode: "booking",
+    };
+    navigate("/rental/contract/draft", { state: transformedState });
   };
   const handleGoToCustomerSearch = () => {
     navigate(`/rental/customerSearch`);
@@ -134,7 +149,7 @@ export const SearchContractBooked = () => {
                       )}
                     </div>
                     <button
-                      onClick={() => handleSelectContract(contract.id)}
+                      onClick={() => handleSelectContract(contract)}
                       className=" absolute right-2 bottom-2 mt-1 py-1 px-3 bg-indigo-500 text-white text-sm rounded hover:bg-indigo-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                     >
                       Chọn hợp đồng này

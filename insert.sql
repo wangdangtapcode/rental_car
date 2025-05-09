@@ -85,15 +85,26 @@ VALUES
 (5, 30, 5500000.0, 5, 5),
 (6, 30, 8000000.0, 6, 6);
 
--- Insert into rental_contracts
-INSERT INTO rental_contracts (id, start_date, end_date, deposit_amount, status, customer_id, employee_id)
-VALUES
-(1, '2025-04-01', '2025-04-07', 5000000.0, 'ACTIVE', 1, 10),
-(2, '2025-04-10', '2025-04-15', 6000000.0, 'ACTIVE', 2, 10),
-(3, '2025-04-20', '2025-04-25', 4000000.0, 'COMPLETED', 3, 10),
-(4, '2025-05-01', '2025-05-10', 7000000.0, 'ACTIVE', 4, 10),
-(5, '2025-05-15', '2025-05-20', 5500000.0, 'CANCELLED', 5, 10),
-(6, '2025-06-01', '2025-06-07', 8000000.0, 'ACTIVE', 1, 10);
+-- Rental Contract for Toyota Innova (800,000 * 3)
+INSERT INTO rental_contracts (id, start_date, end_date, created_date, deposit_amount, due_amount, total_estimated_amount, status, customer_id, employee_id)
+VALUES (1, '2025-05-09', '2025-05-12', '2025-05-09', 480000.0, 1920000.0, 2400000.0, 'BOOKING', 1, 10);
+
+-- Rental Contract for Honda CR-V (1,000,000 * 3)
+INSERT INTO rental_contracts (id, start_date, end_date, created_date, deposit_amount, due_amount, total_estimated_amount, status, customer_id, employee_id)
+VALUES (2, '2025-05-09', '2025-05-12', '2025-05-09', 600000.0, 2400000.0, 3000000.0, 'BOOKING', 2, 10);
+
+-- Rental Contract for Hyundai Accent (600,000 * 3)
+INSERT INTO rental_contracts (id, start_date, end_date, created_date, deposit_amount, due_amount, total_estimated_amount, status, customer_id, employee_id)
+VALUES (3, '2025-05-09', '2025-05-12', '2025-05-09', 360000.0, 1440000.0, 1800000.0, 'BOOKING', 3, 10);
+
+-- Rental Contract for Kia Seltos (900,000 * 3)
+INSERT INTO rental_contracts (id, start_date, end_date, created_date, deposit_amount, due_amount, total_estimated_amount, status, customer_id, employee_id)
+VALUES (4, '2025-05-09', '2025-05-12', '2025-05-09', 540000.0, 2160000.0, 2700000.0, 'BOOKING', 4, 10);
+
+-- Rental Contract for Ford Ranger (1,200,000 * 3)
+INSERT INTO rental_contracts (id, start_date, end_date, created_date, deposit_amount, due_amount, total_estimated_amount, status, customer_id, employee_id)
+VALUES (5, '2025-05-09', '2025-05-12', '2025-05-09', 720000.0, 2880000.0, 3600000.0, 'BOOKING', 5, 10);
+
 -- Insert into contract_vehicle_details
 INSERT INTO contract_vehicle_details (id, rental_price, vehicle_id, rental_contract_id)
 VALUES
@@ -101,14 +112,19 @@ VALUES
 (2, 1000000.0, 2, 2),
 (3, 600000.0, 3, 3),
 (4, 900000.0, 4, 4),
-(5, 1200000.0, 5, 5),
-(6, 950000.0, 6, 6);
+(5, 1200000.0, 5, 5);
 -- Insert into penalty_types
 INSERT INTO penalty_types (id, name, default_amount, description)
 VALUES
 (1, 'Vi phạm giao thông', 500000.0, 'Phạt do vi phạm luật giao thông'),
 (2, 'Hư hỏng xe', 1000000.0, 'Phạt do làm hư hỏng xe'),
-(3, 'Trễ hạn trả xe', 200000.0, 'Phạt do trả xe muộn');
+(3, 'Trễ hạn trả xe', 200000.0, 'Phạt do trả xe muộn'),
+(4, 'Không đổ đầy xăng khi trả xe', 300000.0, 'Phạt do không đổ đầy bình xăng khi hoàn trả xe'),
+(5, 'Làm mất giấy tờ xe', 800000.0, 'Phạt do làm mất giấy đăng ký xe hoặc bảo hiểm xe'),
+(6, 'Làm mất phụ kiện đi kèm', 200000.0, 'Phạt do làm mất phụ kiện như dây sạc, đồ cứu hộ, thảm sàn'),
+(7, 'Không vệ sinh xe khi trả', 100000.0, 'Phạt do không vệ sinh sạch sẽ xe khi hoàn trả'),
+(8, 'Lái xe ngoài khu vực cho phép', 600000.0, 'Phạt do đưa xe ra ngoài khu vực đã cam kết'),
+(9, 'Chở quá số người quy định', 400000.0, 'Phạt do chở quá số lượng hành khách cho phép theo thiết kế xe');
 -- Insert into penalties
 INSERT INTO penalties (id, penalty_amount, note, contract_vehicle_detail_id, penalty_type_id)
 VALUES
@@ -125,8 +141,7 @@ VALUES
 (2, 'Hộ khẩu bản sao', 2),
 (3, 'Sổ hồng bản sao', 3),
 (4, 'CMND bản sao', 4),
-(5, 'Bằng lái xe bản sao', 5),
-(6, 'Hộ khẩu bản sao', 6);
+(5, 'Bằng lái xe bản sao', 5);
 -- Insert into invoice_details
 INSERT INTO invoice_details (id, payment_date, penalty_amount, due_amount, total_amount, rental_contract_id, employee_id)
 VALUES

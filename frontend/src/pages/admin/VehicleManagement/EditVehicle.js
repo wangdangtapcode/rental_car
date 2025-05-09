@@ -1,73 +1,39 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router";
+import { useLocation } from "react-router-dom";
+
 export const EditVehicle = () => {
   const navigate = useNavigate();
   const { id } = useParams();
-  const [vehicle, setVehicle] = useState({
-    id: "",
-    name: "",
-    licensePlate: "",
-    brand: "",
-    type: "",
-    seatCount: "",
-    manufactureYear: "",
-    description: "",
-    rentalPrice: "",
-    vehicleCondition: "",
-    ownerType: "",
-    status: "",
-    vehicleImages: [],
-  });
+  const location = useLocation();
+  const [vehicle, setVehicle] = useState({});
   const [thumbnailIndex, setThumbnailIndex] = useState(null);
 
   useEffect(() => {
-    if (id) {
-      const fetchVehicle = async () => {
-        try {
-          const response = await axios.get(
-            `http://localhost:8081/api/management/vehicle/edit/${id}`
-          );
-          if (response.data) {
-            const data = response.data;
-            console.log(data);
-            setVehicle({
-              id: data.id || "",
-              name: data.name || "",
-              licensePlate: data.licensePlate || "",
-              brand: data.brand || "",
-              type: data.type || "",
-              seatCount: data.seatCount || "",
-              manufactureYear: data.manufactureYear || "",
-              description: data.description || "",
-              rentalPrice: data.rentalPrice || "",
-              vehicleCondition: data.vehicleCondition || "",
-              ownerType: data.ownerType || "",
-              status: data.status || "",
-              vehicleImages: data.vehicleImages.map((img, index) => ({
-                id: img.id,
-                name: img.name,
-                type: img.type,
-                url: img.imageUri ? img.imageUri : "",
-                isThumbnail: img.isThumbnail,
-                file: null, // Không có file khi tải từ backend
-              })),
-            });
-            setThumbnailIndex(
-              data.vehicleImages.findIndex((img) => img.isThumbnail) !== -1
-                ? data.vehicleImages.findIndex((img) => img.isThumbnail)
-                : null
-            );
-          } else {
-            console.error("Failed to fetch vehicle:", await response.text());
-          }
-        } catch (error) {
-          console.error("Error fetching vehicle:", error);
-        }
-      };
-      fetchVehicle();
+    const vehicleFromState = location.state?.vehicle;
+    if (vehicleFromState) {
+      setVehicle({
+        ...vehicleFromState,
+        vehicleImages: vehicleFromState.vehicleImages.map((img, index) => ({
+          id: img.id,
+          name: img.name,
+          type: img.type,
+          url: img.imageUri ?? "",
+          isThumbnail: img.isThumbnail,
+          file: null, // vì không có file thực khi load từ backend
+        })),
+      });
+
+      const thumbnailIdx = vehicleFromState.vehicleImages.findIndex(
+        (img) => img.isThumbnail
+      );
+      setThumbnailIndex(thumbnailIdx !== -1 ? thumbnailIdx : null);
+      console.log(vehicle);
+    } else {
+      console.error("Không tìm thấy xe trong state.");
     }
-  }, [id]);
+  }, [location.state, id]);
   const handleChange = (e) => {
     setVehicle({ ...vehicle, [e.target.name]: e.target.value });
   };
@@ -278,7 +244,7 @@ export const EditVehicle = () => {
       </div>
 
       {/* Danh sách ảnh */}
-      {vehicle.vehicleImages.length > 0 && (
+      {vehicle.vehicleImages && vehicle.vehicleImages.length > 0 && (
         <div className="grid grid-cols-4 gap-4 mt-4">
           {vehicle.vehicleImages.map((img, index) => (
             <div
