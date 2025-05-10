@@ -1,5 +1,7 @@
 package com.springboot.backend.Service;
 
+import com.springboot.backend.Model.Collateral;
+import com.springboot.backend.Model.ContractVehicleDetail;
 import com.springboot.backend.Model.RentalContract;
 import org.springframework.stereotype.Service;
 
@@ -8,13 +10,7 @@ import java.util.Map;
 
 @Service
 public interface RentalContractService {
-    boolean createRentalContract(
-            Long customerId,
-            Long employeeId,
-            RentalContract rentalContract,
-            List<Map<String, Object>> contractVehicleDetails,
-            List<Map<String, Object>> collaterals
-            );
+    boolean createRentalContract(RentalContract rentalContract);
     boolean updateContract(
             Long employeeId,
             Long rentalContractId,

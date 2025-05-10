@@ -50,9 +50,9 @@ VALUES
 -- Insert into vehicles
 INSERT INTO vehicles (id, name, license_plate, brand, type, seat_count, manufacture_year, description, rental_price, vehicle_condition, owner_type, status, consignment_contract_id)
 VALUES
-(1, 'Toyota Innova', '51H-12345', 'Toyota', 'MPV', 7, 2020, 'Toyota Innova là dòng xe MPV rất phổ biến tại Việt Nam, được nhiều gia đình và doanh nghiệp tin dùng. Xe có thiết kế rộng rãi với 7 chỗ ngồi thoải mái, khoang hành lý lớn phù hợp cho những chuyến đi xa. Động cơ của Innova được đánh giá là bền bỉ, dễ bảo dưỡng. Ngoài ra, xe còn trang bị nhiều tính năng an toàn cơ bản, phù hợp với nhu cầu sử dụng hằng ngày. Đây là sự lựa chọn đáng tin cậy cho khách hàng muốn thuê xe gia đình.', 800000.0, 'GOOD', 'STORE', 'ACTIVE', null),
-(2, 'Honda CR-V', '51G-67890', 'Honda', 'SUV', 5, 2021, 'Honda CR-V mang lại trải nghiệm lái mượt mà và hiện đại. Xe có khoang nội thất tiện nghi, tích hợp nhiều công nghệ như hỗ trợ giữ làn, cảnh báo va chạm và phanh tự động. Không gian bên trong rộng rãi, ghế ngồi thoải mái cho cả 5 hành khách. CR-V có kiểu dáng thể thao, động cơ tiết kiệm nhiên liệu. Phù hợp với nhóm khách gia đình hoặc khách công tác dài ngày.', 1000000.0, 'EXCELLENT', 'STORE', 'ACTIVE', null),
-(3, 'Hyundai Accent', '51F-23456', 'Hyundai', 'Sedan', 5, 2019, 'Hyundai Accent là chiếc sedan nhỏ gọn lý tưởng cho các tuyến đường nội thành. Với thiết kế hiện đại và khả năng vận hành ổn định, Accent đáp ứng tốt nhu cầu đi lại cá nhân hoặc theo nhóm nhỏ. Xe có khả năng tiết kiệm nhiên liệu tốt, đồng thời nội thất được thiết kế tối ưu hóa không gian. Đây là mẫu xe phù hợp cho người mới lái hoặc khách cần di chuyển linh hoạt.', 600000.0, 'GOOD', 'STORE', 'ACTIVE', null),
+(1, 'Toyota Innova', '51H-12345', 'Toyota', 'MPV', 7, 2020, 'Toyota Innova là dòng xe MPV rất phổ biến tại Việt Nam, được nhiều gia đình và doanh nghiệp tin dùng. Xe có thiết kế rộng rãi với 7 chỗ ngồi thoải mái, khoang hành lý lớn phù hợp cho những chuyến đi xa. Động cơ của Innova được đánh giá là bền bỉ, dễ bảo dưỡng. Ngoài ra, xe còn trang bị nhiều tính năng an toàn cơ bản, phù hợp với nhu cầu sử dụng hằng ngày. Đây là sự lựa chọn đáng tin cậy cho khách hàng muốn thuê xe gia đình.', 800000.0, 'GOOD', 'STORE', 'RENTED', null),
+(2, 'Honda CR-V', '51G-67890', 'Honda', 'SUV', 5, 2021, 'Honda CR-V mang lại trải nghiệm lái mượt mà và hiện đại. Xe có khoang nội thất tiện nghi, tích hợp nhiều công nghệ như hỗ trợ giữ làn, cảnh báo va chạm và phanh tự động. Không gian bên trong rộng rãi, ghế ngồi thoải mái cho cả 5 hành khách. CR-V có kiểu dáng thể thao, động cơ tiết kiệm nhiên liệu. Phù hợp với nhóm khách gia đình hoặc khách công tác dài ngày.', 1000000.0, 'EXCELLENT', 'STORE', 'RENTED', null),
+(3, 'Hyundai Accent', '51F-23456', 'Hyundai', 'Sedan', 5, 2019, 'Hyundai Accent là chiếc sedan nhỏ gọn lý tưởng cho các tuyến đường nội thành. Với thiết kế hiện đại và khả năng vận hành ổn định, Accent đáp ứng tốt nhu cầu đi lại cá nhân hoặc theo nhóm nhỏ. Xe có khả năng tiết kiệm nhiên liệu tốt, đồng thời nội thất được thiết kế tối ưu hóa không gian. Đây là mẫu xe phù hợp cho người mới lái hoặc khách cần di chuyển linh hoạt.', 600000.0, 'GOOD', 'STORE', 'RENTED', null),
 (4, 'Kia Seltos', '51E-78901', 'Kia', 'SUV', 5, 2022, 'Kia Seltos sở hữu ngoại hình bắt mắt với thiết kế trẻ trung, thể thao. Nội thất bên trong hiện đại, được trang bị màn hình giải trí trung tâm và hệ thống âm thanh sống động. Seltos phù hợp cho các chuyến đi du lịch hoặc công tác. Khả năng vận hành ổn định trên nhiều loại địa hình là một điểm mạnh lớn. Xe còn tích hợp nhiều tính năng an toàn như cảm biến, camera lùi.', 900000.0, 'EXCELLENT', 'STORE', 'ACTIVE', null),
 (5, 'Ford Ranger', '51D-34567', 'Ford', 'Pickup', 5, 2020, 'Ford Ranger là dòng bán tải mạnh mẽ, phù hợp cho những chuyến đi xa hoặc chuyên chở hàng hóa. Xe có động cơ Diesel bền bỉ, tiết kiệm nhiên liệu. Cabin rộng rãi, tiện nghi với các trang bị hiện đại như màn hình cảm ứng, điều hòa tự động. Ranger có khả năng vượt địa hình tốt, gầm cao giúp di chuyển dễ dàng ở vùng cao hay vùng ngập.', 1200000.0, 'GOOD', 'STORE', 'ACTIVE', null),
 (6, 'Mazda CX-5', '51C-89012', 'Mazda', 'SUV', 5, 2021, 'Mazda CX-5 nổi bật với thiết kế KODO sang trọng, tinh tế. Nội thất bọc da cao cấp, vô-lăng tích hợp nút điều khiển và hệ thống giải trí hiện đại. Xe vận hành êm ái, cách âm tốt, phù hợp cho khách hàng yêu cầu cao về trải nghiệm lái. CX-5 là lựa chọn tuyệt vời cho gia đình hoặc người đi công tác cần sự thoải mái và an toàn.', 950000.0, 'EXCELLENT', 'STORE', 'ACTIVE', null),
@@ -87,15 +87,15 @@ VALUES
 
 -- Rental Contract for Toyota Innova (800,000 * 3)
 INSERT INTO rental_contracts (id, start_date, end_date, created_date, deposit_amount, due_amount, total_estimated_amount, status, customer_id, employee_id)
-VALUES (1, '2025-05-09', '2025-05-12', '2025-05-09', 480000.0, 1920000.0, 2400000.0, 'BOOKING', 1, 10);
+VALUES (1, '2025-05-09', '2025-05-12', '2025-05-09', 480000.0, 1920000.0, 2400000.0, 'BOOKING', 1, null);
 
 -- Rental Contract for Honda CR-V (1,000,000 * 3)
 INSERT INTO rental_contracts (id, start_date, end_date, created_date, deposit_amount, due_amount, total_estimated_amount, status, customer_id, employee_id)
-VALUES (2, '2025-05-09', '2025-05-12', '2025-05-09', 600000.0, 2400000.0, 3000000.0, 'BOOKING', 2, 10);
+VALUES (2, '2025-05-09', '2025-05-12', '2025-05-09', 600000.0, 2400000.0, 3000000.0, 'BOOKING', 2, null);
 
 -- Rental Contract for Hyundai Accent (600,000 * 3)
 INSERT INTO rental_contracts (id, start_date, end_date, created_date, deposit_amount, due_amount, total_estimated_amount, status, customer_id, employee_id)
-VALUES (3, '2025-05-09', '2025-05-12', '2025-05-09', 360000.0, 1440000.0, 1800000.0, 'BOOKING', 3, 10);
+VALUES (3, '2025-05-09', '2025-05-12', '2025-05-09', 360000.0, 1440000.0, 1800000.0, 'BOOKING', 3, null);
 
 -- Rental Contract for Kia Seltos (900,000 * 3)
 INSERT INTO rental_contracts (id, start_date, end_date, created_date, deposit_amount, due_amount, total_estimated_amount, status, customer_id, employee_id)

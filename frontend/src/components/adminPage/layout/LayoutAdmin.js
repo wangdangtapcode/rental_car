@@ -3,16 +3,21 @@ import { Outlet } from "react-router";
 import { Sidebar } from "./Sidebar";
 import { Topbar } from "./Topbar";
 import { useEffect } from "react";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 export const LayoutAdmin = () => {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const navigate = useNavigate();
+
   const user = useSelector((state) => state.user.user);
   console.log("Admin in HeaderAdmin:", user);
   useEffect(() => {
+    const userType = user.user.userType;
     if (!user) {
       navigate("/login");
+    } else if (userType === "CUSTOMER") {
+      alert("Bạn không có quyền truy cập vào trang này.");
+      navigate("/");
     }
   }, [user, navigate]);
   return (

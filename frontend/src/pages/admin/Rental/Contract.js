@@ -174,35 +174,37 @@ export const ContractDraft = () => {
     const now = new Date();
     const formattedCreatedDate = now.toISOString().slice(0, 10);
 
-    let payload;
+    let rentalContract;
     let apiUrl;
     let successMessage;
     if (mode === "new") {
       apiUrl = `http://localhost:8081/api/rentalContract/create`;
       successMessage = "Thêm hợp đồng mới thành công!";
-      payload = {
-        customerId: customer.id,
-        employeeId: user.id,
-        rentalContract: {
-          startDate: searchParams.startDate,
-          endDate: searchParams.endDate,
-          depositAmount: displayValues.depositAmount,
-          totalEstimatedAmount: displayValues.totalEstimatedAmount,
-          dueAmount: displayValues.dueAmount,
-          createdDate: formattedCreatedDate,
-          contractVehicleDetails: vehiclesWithNotes.map((item) => ({
-            vehicleId: item.vehicle.id,
+      rentalContract = {
+        customer: customer,
+        employee: user,
+        startDate: searchParams.startDate,
+        endDate: searchParams.endDate,
+        depositAmount: displayValues.depositAmount,
+        totalEstimatedAmount: displayValues.totalEstimatedAmount,
+        dueAmount: displayValues.dueAmount,
+        createdDate: formattedCreatedDate,
+        status: "ACTICE",
+        contractVehicleDetails: vehiclesWithNotes.map((item) => ({
+          vehicle: {
+            ...item.vehicle,
             vehicleCondition: item.conditionNotes,
-            rentalPrice: item.vehicle.rentalPrice,
-          })),
-          collaterals: collaterals.map((desc) => ({ description: desc })),
-        },
+            status: "RENTED",
+          },
+          rentalPrice: item.vehicle.rentalPrice,
+        })),
+        collaterals: collaterals.map((desc) => ({ description: desc })),
       };
     } else if (mode === "booking" && originalContract) {
       apiUrl = `http://localhost:8081/api/rentalContract/update/${originalContract.id}`;
       successMessage = `Xác nhận nhận xe cho hợp đồng ${originalContract.id} thành công!`;
-      payload = {
-        employeeId: user.id,
+      rentalContract = {
+        employeeId: user,
         updatedVehicleConditions: vehiclesWithNotes.map((item) => ({
           contractVehicleDetailId: originalContract.contractVehicleDetails.find(
             (sv) => sv.vehicle.id === item.vehicle.id
@@ -227,11 +229,11 @@ export const ContractDraft = () => {
 
     console.log(
       `Payload cho mode '${mode}':`,
-      JSON.stringify(payload, null, 2)
+      JSON.stringify(rentalContract, null, 2)
     );
 
     try {
-      const response = await axios.post(apiUrl, payload);
+      const response = await axios.post(apiUrl, rentalContract);
       if (response.data === true) {
         alert(successMessage);
         navigate(`/rental/customerSearch`, { replace: true });

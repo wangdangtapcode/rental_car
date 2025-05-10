@@ -10,12 +10,11 @@ export const Login = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  // Nếu đã login thì tự động điều hướng
   useEffect(() => {
     if (user) {
-      if (user.userType === "EMPLOYEE") {
+      if (user.user.userType === "EMPLOYEE") {
         navigate("/admin");
-      } else if (user.userType === "CUSTOMER") {
+      } else if (user.user.userType === "CUSTOMER") {
         navigate("/");
       }
     }
@@ -33,12 +32,14 @@ export const Login = () => {
 
       const data = response.data;
       console.log(data);
-      if (data && data.userType) {
+
+      if (data && data.user && data.user.userType) {
         dispatch(setUser(data));
         alert("Đăng nhập thành công!");
-        if (data.userType === "EMPLOYEE") {
+
+        if (data.user.userType === "EMPLOYEE") {
           navigate("/admin");
-        } else if (data.userType === "CUSTOMER") {
+        } else if (data.user.userType === "CUSTOMER") {
           navigate("/");
         }
       } else {

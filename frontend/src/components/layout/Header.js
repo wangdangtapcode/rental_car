@@ -8,11 +8,6 @@ export const Header = () => {
   const navigate = useNavigate();
   const user = useSelector((state) => state.user.user);
   console.log("User in Header:", user);
-  useEffect(() => {
-    if (!user) {
-      navigate("/login");
-    }
-  }, [user, navigate]);
   const dispatch = useDispatch();
   const handleLogout = () => {
     dispatch(logoutUser());

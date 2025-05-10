@@ -73,7 +73,6 @@ public class VehicleServiceImpl implements VehicleService {
             for (VehicleImage vehicleImage : vehicle.getVehicleImages()) {
                 String imgBase64 = ImageUtils.encodeToBase64(vehicleImage.getImageData());
                 String imageUri = "data:" + vehicleImage.getType() + ";base64," + imgBase64;
-                vehicleImage.setImageData(null);
                 vehicleImage.setImageUri(imageUri);
             }
         }
