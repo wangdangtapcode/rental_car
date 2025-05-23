@@ -12,6 +12,7 @@ export const EditVehicle = () => {
 
   useEffect(() => {
     const vehicleFromState = location.state?.vehicle;
+    console.log(vehicleFromState);
     if (vehicleFromState) {
       setVehicle({
         ...vehicleFromState,

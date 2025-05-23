@@ -3,6 +3,7 @@ import { useState, useEffect, useCallback } from "react";
 import { formatCurrency } from "../../../utils/formatters";
 import axios from "axios";
 import { useSelector } from "react-redux";
+
 export const ContractDraft = () => {
   const user = useSelector((state) => state.user.user);
   const location = useLocation();
@@ -13,7 +14,6 @@ export const ContractDraft = () => {
   const originalContract = contractInputData?.originalContractData;
   // State chính của trang này
   const [customer, setCustomer] = useState(null);
-  const [searchParams, setSearchParams] = useState(null);
   const [vehiclesWithNotes, setVehiclesWithNotes] = useState([]);
   const [collaterals, setCollaterals] = useState([]);
   const [newCollateralInput, setNewCollateralInput] = useState("");
@@ -31,85 +31,99 @@ export const ContractDraft = () => {
   useEffect(() => {
     if (!contractInputData) {
       console.error("ContractDraft: Missing input data. Navigating back.");
-      navigate("/rental/customerSearch", { replace: true });
+      navigate("/rental/vehicles", { replace: true });
       return;
     }
     console.log("ContractDraft: Input data:", contractInputData);
     if (contractInputData.customer) setCustomer(contractInputData.customer);
-    if (contractInputData.searchParams)
-      setSearchParams(contractInputData.searchParams);
 
     if (contractInputData.selectedVehicles) {
-      setVehiclesWithNotes(contractInputData.selectedVehicles);
-    }
+      if (mode === "new") {
+        // Cập nhật để tính tài chính cho từng xe
+        const vehiclesWithFinancials = contractInputData.selectedVehicles.map(
+          (vehicle) => {
+            // Tính ngày thuê
+            const startDate = new Date(vehicle.startDate);
+            const endDate = new Date(vehicle.endDate);
+            const diffTime = Math.abs(endDate - startDate);
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
 
-    if (mode === "booking" && originalContract) {
-      setDisplayValues({
-        totalEstimatedAmount: originalContract.totalEstimatedAmount || 0,
-        depositAmount: originalContract.depositAmount || 0,
-        dueAmount: originalContract.dueAmount || 0,
-      });
+            // Tính tài chính
+            const price = Number(vehicle.vehicle?.rentalPrice);
+            const totalAmount = price * diffDays;
+            const depositAmount = totalAmount * 0.2; // 20% tiền cọc
+            const dueAmount = totalAmount - depositAmount;
 
-      setCollaterals(
-        originalContract.collaterals?.map((c) => c.description) || []
-      );
-    } else if (mode === "new") {
-      setCollaterals([]);
+            return {
+              ...vehicle,
+              totalEstimatedAmount: totalAmount,
+              depositAmount: depositAmount,
+              dueAmount: dueAmount,
+            };
+          }
+        );
+        setVehiclesWithNotes(vehiclesWithFinancials);
+      } else if (mode === "booking") {
+        // Giữ nguyên thông tin tài chính từ đơn đặt trước
+        setVehiclesWithNotes(contractInputData.selectedVehicles);
+        setDisplayValues({
+          totalEstimatedAmount:
+            contractInputData.originalContractData.totalEstimatedAmount || 0,
+          depositAmount:
+            contractInputData.originalContractData.depositAmount || 0,
+          dueAmount: contractInputData.originalContractData.dueAmount || 0,
+        });
+        setCollaterals(
+          contractInputData.originalContractData.collaterals?.map(
+            (c) => c.description
+          ) || []
+        );
+      }
     }
-  }, [contractInputData, mode, originalContract, navigate]);
+  }, [contractInputData, mode, navigate]);
 
-  // Sửa hàm calculateNewFinancials
-  const calculateNewFinancials = useCallback(() => {
-    // Chỉ tính toán nếu là mode 'new' và có đủ dữ liệu
-    if (mode !== "new" || !searchParams || vehiclesWithNotes.length === 0) {
-      return { total: 0, deposit: 0, due: 0 };
-    }
-    const start = new Date(searchParams.startDate);
-    const end = new Date(searchParams.endDate);
-    if (isNaN(start.getTime()) || isNaN(end.getTime()) || end < start) {
-      return { total: 0, deposit: 0, due: 0 };
-    }
-    const diffTime = Math.abs(end - start);
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
-    if (isNaN(diffDays) || diffDays <= 0) {
-      return { total: 0, deposit: 0, due: 0 };
-    }
-    const totalEstimated = vehiclesWithNotes.reduce((total, item) => {
-      const price = Number(item.vehicle?.rentalPrice);
-      if (isNaN(price) || price < 0) return total;
-      return total + price * diffDays;
-    }, 0);
-    const deposit = totalEstimated * 0.2;
-    const due = totalEstimated - deposit;
-    return { total: totalEstimated, deposit: deposit, due: due };
-  }, [mode, searchParams, vehiclesWithNotes]); // Bỏ displayValues khỏi dependencies
+  // Cập nhật tính toán tài chính tổng
+  const calculateTotalFinancials = useCallback(() => {
+    // Tính tổng từ các xe đã chọn
+    const totalEstimated = vehiclesWithNotes.reduce(
+      (sum, item) => sum + (item.totalEstimatedAmount || 0),
+      0
+    );
 
+    const totalDeposit = vehiclesWithNotes.reduce(
+      (sum, item) => sum + (item.depositAmount || 0),
+      0
+    );
+
+    const totalDue = vehiclesWithNotes.reduce(
+      (sum, item) => sum + (item.dueAmount || 0),
+      0
+    );
+
+    return {
+      total: totalEstimated,
+      deposit: totalDeposit,
+      due: totalDue,
+    };
+  }, [vehiclesWithNotes]);
+
+  // Cập nhật hiển thị tài chính tổng hợp khi danh sách xe thay đổi
   useEffect(() => {
     if (mode === "new") {
-      const { total, deposit, due } = calculateNewFinancials();
-      setDisplayValues((prevValues) => {
-        if (
-          prevValues.totalEstimatedAmount !== total ||
-          prevValues.depositAmount !== deposit ||
-          prevValues.dueAmount !== due
-        ) {
-          return {
-            totalEstimatedAmount: total,
-            depositAmount: deposit,
-            dueAmount: due,
-          };
-        }
-        return prevValues;
+      const { total, deposit, due } = calculateTotalFinancials();
+      setDisplayValues({
+        totalEstimatedAmount: total,
+        depositAmount: deposit,
+        dueAmount: due,
       });
     }
-  }, [mode, searchParams, vehiclesWithNotes, calculateNewFinancials]);
+  }, [mode, vehiclesWithNotes, calculateTotalFinancials]);
 
   // Xử lý thay đổi ghi chú tình trạng xe
   const handleConditionNotesChange = useCallback((vehicleId, notes) => {
     setVehiclesWithNotes((prevVehicles) =>
       prevVehicles.map((item) => {
         if (item.vehicle.id === vehicleId) {
-          console.log(item); // In thông tin xe trước khi thay đổi
           return { ...item, conditionNotes: notes };
         }
         return item;
@@ -117,24 +131,21 @@ export const ContractDraft = () => {
     );
   }, []);
 
-  //
   const handleNewCollateralChange = (event) => {
     if (mode === "new") {
-      // Chỉ cho phép thay đổi nếu là mode 'new'
       setNewCollateralInput(event.target.value);
     }
   };
-  //
+
   const handleAddCollateral = () => {
-    if (mode !== "new") return; // Không làm gì nếu không phải mode 'new'
+    if (mode !== "new") return;
     const trimmedInput = newCollateralInput.trim();
     if (trimmedInput) {
       setCollaterals((prevCollaterals) => [...prevCollaterals, trimmedInput]);
       setNewCollateralInput("");
     }
   };
-  //
-  // Xử lý xóa tài sản đảm bảo (theo index)
+
   const handleRemoveCollateral = (indexToRemove) => {
     if (mode !== "new") return;
     setCollaterals((prevCollaterals) =>
@@ -148,7 +159,6 @@ export const ContractDraft = () => {
     // Kiểm tra chung
     if (
       !customer ||
-      !searchParams ||
       vehiclesWithNotes.length === 0 ||
       collaterals.length === 0
     ) {
@@ -156,6 +166,16 @@ export const ContractDraft = () => {
       setIsSaving(false);
       return;
     }
+
+    // Kiểm tra từng xe có dữ liệu đủ điều kiện không
+    for (const vehicle of vehiclesWithNotes) {
+      if (!vehicle.startDate || !vehicle.endDate) {
+        setError("Thiếu thông tin ngày thuê cho một hoặc nhiều xe.");
+        setIsSaving(false);
+        return;
+      }
+    }
+
     if (!user || !user.id) {
       setError(
         "Không xác định được thông tin nhân viên. Vui lòng đăng nhập lại."
@@ -163,14 +183,7 @@ export const ContractDraft = () => {
       setIsSaving(false);
       return;
     }
-    // Kiểm tra tiền cọc cho mode 'new'
-    if (mode === "new" && displayValues.depositAmount <= 0) {
-      setError(
-        "Tiền cọc dự kiến phải lớn hơn 0. Kiểm tra lại ngày hoặc xe đã chọn."
-      );
-      setIsSaving(false);
-      return;
-    }
+
     const now = new Date();
     const formattedCreatedDate = now.toISOString().slice(0, 10);
 
@@ -178,18 +191,25 @@ export const ContractDraft = () => {
     let apiUrl;
     let successMessage;
     if (mode === "new") {
+      // Kiểm tra tiền cọc cho mode 'new'
+      if (displayValues.depositAmount <= 0) {
+        setError(
+          "Tiền cọc dự kiến phải lớn hơn 0. Kiểm tra lại ngày hoặc xe đã chọn."
+        );
+        setIsSaving(false);
+        return;
+      }
+
       apiUrl = `http://localhost:8081/api/rentalContract/create`;
       successMessage = "Thêm hợp đồng mới thành công!";
       rentalContract = {
         customer: customer,
         employee: user,
-        startDate: searchParams.startDate,
-        endDate: searchParams.endDate,
         depositAmount: displayValues.depositAmount,
         totalEstimatedAmount: displayValues.totalEstimatedAmount,
         dueAmount: displayValues.dueAmount,
         createdDate: formattedCreatedDate,
-        status: "ACTICE",
+        status: "ACTIVE",
         contractVehicleDetails: vehiclesWithNotes.map((item) => ({
           vehicle: {
             ...item.vehicle,
@@ -197,6 +217,12 @@ export const ContractDraft = () => {
             status: "RENTED",
           },
           rentalPrice: item.vehicle.rentalPrice,
+          startDate: item.startDate,
+          endDate: item.endDate,
+          totalEstimatedAmount: item.totalEstimatedAmount,
+          depositAmount: item.depositAmount,
+          dueAmount: item.dueAmount,
+          status: "ACTIVE",
         })),
         collaterals: collaterals.map((desc) => ({ description: desc })),
       };
@@ -204,23 +230,17 @@ export const ContractDraft = () => {
       apiUrl = `http://localhost:8081/api/rentalContract/update/${originalContract.id}`;
       successMessage = `Xác nhận nhận xe cho hợp đồng ${originalContract.id} thành công!`;
       rentalContract = {
-        employeeId: user,
-        updatedVehicleConditions: vehiclesWithNotes.map((item) => ({
-          contractVehicleDetailId: originalContract.contractVehicleDetails.find(
-            (sv) => sv.vehicle.id === item.vehicle.id
-          )?.id,
-          vehicleId: item.vehicle.id,
-          conditionNotes: item.conditionNotes, // Ghi chú tình trạng mới khi giao
+        id: originalContract.id,
+        employee: user,
+        status: "ACTIVE",
+        contractVehicleDetails: vehiclesWithNotes.map((item) => ({
+          vehicle: {
+            ...item.vehicle,
+            vehicleCondition: item.conditionNotes,
+          },
+          status: "ACTIVE",
         })),
-        // Backend sẽ tự động chuyển status của RentalContract sang ACTIVE
-        // và có thể tạo Invoice cho phần dueAmount nếu cần thu ngay
       };
-      // Quan trọng: Đối với `updatedVehicleConditions`, bạn cần cách để liên kết `conditionNotes` mới
-      // với `ContractVehicleDetail` cụ thể trong DB.
-      // Nếu `contractInputData.selectedVehicles` (từ `transformedState`) có chứa ID của `ContractVehicleDetail`
-      // thì bạn có thể dùng nó. Nếu không, backend có thể cần `vehicleId` và `rentalContractId` để tìm.
-      // Ví dụ trên giả sử `contractVehicleDetailId` có thể không có, backend sẽ dựa vào `vehicleId`
-      // và ID của hợp đồng (từ URL) để tìm ContractVehicleDetail tương ứng.
     } else {
       setError("Chế độ hoạt động không hợp lệ.");
       setIsSaving(false);
@@ -236,7 +256,7 @@ export const ContractDraft = () => {
       const response = await axios.post(apiUrl, rentalContract);
       if (response.data === true) {
         alert(successMessage);
-        navigate(`/rental/customerSearch`, { replace: true });
+        navigate(`/rental/vehicles`, { replace: true });
       } else {
         setError("Lưu hợp đồng thất bại. Phản hồi từ server không hợp lệ.");
         setIsSaving(false);
@@ -261,7 +281,6 @@ export const ContractDraft = () => {
     }
   }, [
     customer,
-    searchParams,
     vehiclesWithNotes,
     collaterals,
     user,
@@ -269,10 +288,9 @@ export const ContractDraft = () => {
     mode,
     originalContract,
     displayValues,
-    contractInputData,
   ]);
 
-  if (!customer || !searchParams) {
+  if (!customer) {
     return <div className="container mx-auto p-4">Đang tải dữ liệu...</div>;
   }
 
@@ -290,8 +308,8 @@ export const ContractDraft = () => {
         <button
           onClick={() => {
             if (mode === "new") {
-              navigate(`/rental/vehicles/${customer.id}`, {
-                state: customer,
+              navigate(`/rental/customerSearch`, {
+                state: { selectedVehicles: vehiclesWithNotes },
               });
             } else {
               navigate("/rental/contractSearch", { replace: true });
@@ -299,7 +317,9 @@ export const ContractDraft = () => {
           }}
           className="text-md text-blue-600 hover:underline"
         >
-          {mode === "new" ? "Quay lại chọn xe" : "Quay lại tìm hợp đồng"}
+          {mode === "new"
+            ? "Quay lại chọn khách hàng"
+            : "Quay lại tìm hợp đồng"}
         </button>
       </div>
       {error && (
@@ -334,15 +354,9 @@ export const ContractDraft = () => {
         </div>
         {/* Thông tin thuê */}
         <div className="border rounded p-4 bg-gray-50">
-          <h3 className="font-semibold mb-2 text-gray-800">Thông tin thuê</h3>
-          <p>
-            <strong>Từ ngày:</strong>{" "}
-            {new Date(searchParams.startDate).toLocaleDateString("vi-VN")}
-          </p>
-          <p>
-            <strong>Đến ngày:</strong>{" "}
-            {new Date(searchParams.endDate).toLocaleDateString("vi-VN")}
-          </p>
+          <h3 className="font-semibold mb-2 text-gray-800">
+            Thông tin tổng hợp
+          </h3>
           <p className="mt-2 font-semibold">
             Tổng tiền thuê dự kiến:{" "}
             <span className="text-indigo-700">
@@ -376,64 +390,126 @@ export const ContractDraft = () => {
               key={item.vehicle.id}
               className="border-b pb-4 last:border-b-0"
             >
-              <div className="mr-3 flex-shrink-0 w-24 h-24 md:w-32 md:h-32">
-                {item.vehicle.vehicleImages &&
-                item.vehicle.vehicleImages.length > 0 ? (
-                  (() => {
-                    const thumbnail = item.vehicle.vehicleImages.find(
-                      (img) => img.isThumbnail
-                    );
-                    return (
-                      thumbnail &&
-                      thumbnail.imageUri && (
-                        <img
-                          src={thumbnail.imageUri}
-                          alt={thumbnail.name}
-                          className="w-full h-full object-cover rounded"
-                        />
-                      )
-                    );
-                  })()
-                ) : (
-                  <div className="w-full h-full bg-gray-200 rounded flex items-center justify-center">
-                    <span className="text-gray-400 text-xs text-center">
-                      Không có ảnh
-                    </span>
+              <div className="flex flex-col sm:flex-row">
+                <div className="mr-3 flex-shrink-0 w-24 h-24 md:w-32 md:h-32">
+                  {item.vehicle.vehicleImages &&
+                  item.vehicle.vehicleImages.length > 0 ? (
+                    (() => {
+                      const thumbnail = item.vehicle.vehicleImages.find(
+                        (img) => img.isThumbnail
+                      );
+                      return (
+                        thumbnail &&
+                        thumbnail.imageUri && (
+                          <img
+                            src={thumbnail.imageUri}
+                            alt={thumbnail.name}
+                            className="w-full h-full object-cover rounded"
+                          />
+                        )
+                      );
+                    })()
+                  ) : (
+                    <div className="w-full h-full bg-gray-200 rounded flex items-center justify-center">
+                      <span className="text-gray-400 text-xs text-center">
+                        Không có ảnh
+                      </span>
+                    </div>
+                  )}
+                </div>
+                <div className="flex-grow">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-2">
+                    <p className="font-medium text-lg">
+                      {item.vehicle.name}{" "}
+                      <span className="text-base font-normal text-gray-600">
+                        ({item.vehicle.licensePlate})
+                      </span>
+                    </p>
+                    <p className="text-sm text-gray-700 sm:ml-4">
+                      Giá/ngày:{" "}
+                      <span className="font-bold text-indigo-600">
+                        {formatCurrency(item.vehicle.rentalPrice)}
+                      </span>
+                    </p>
                   </div>
-                )}
-              </div>
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-2">
-                <p className="font-medium text-lg">
-                  {item.vehicle.name}{" "}
-                  <span className="text-base font-normal text-gray-600">
-                    ({item.vehicle.licensePlate})
-                  </span>
-                </p>
-                <p className="text-sm text-gray-700 sm:ml-4">
-                  Giá/ngày:{" "}
-                  <span className="font-bold text-indigo-600">
-                    {formatCurrency(item.vehicle.rentalPrice)}
-                  </span>
-                </p>
-              </div>
-              {/* Input Tình trạng xe */}
-              <div>
-                <label
-                  htmlFor={`condition-${item.vehicle.id}`}
-                  className="block text-sm font-medium text-gray-700 mb-1"
-                >
-                  Tình trạng xe khi giao (ghi chú):
-                </label>
-                <textarea
-                  id={`condition-${item.vehicle.id}`}
-                  rows="2"
-                  value={item.conditionNotes}
-                  onChange={(e) =>
-                    handleConditionNotesChange(item.vehicle.id, e.target.value)
-                  } // Gọi handler khi thay đổi
-                  placeholder="Ví dụ: Trầy xước nhẹ cản trước, mức xăng còn 1 vạch,..."
-                  className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                />
+
+                  {/* Hiển thị thời gian thuê của xe */}
+                  <div className="mt-2 mb-3 grid grid-cols-1 md:grid-cols-2 gap-2">
+                    <div className="flex items-center">
+                      <span className="text-sm font-medium text-gray-700 mr-2">
+                        Từ ngày:
+                      </span>
+                      <span className="text-sm font-medium">
+                        {item.startDate
+                          ? new Date(item.startDate).toLocaleDateString("vi-VN")
+                          : "N/A"}
+                      </span>
+                    </div>
+                    <div className="flex items-center">
+                      <span className="text-sm font-medium text-gray-700 mr-2">
+                        Đến ngày:
+                      </span>
+                      <span className="text-sm font-medium">
+                        {item.endDate
+                          ? new Date(item.endDate).toLocaleDateString("vi-VN")
+                          : "N/A"}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Thông tin tài chính cho từng xe */}
+                  <div className="mb-3 text-sm">
+                    <div className="grid grid-cols-3 gap-2">
+                      <div>
+                        <span className="font-medium text-gray-700">
+                          Thành tiền:
+                        </span>{" "}
+                        <span className="text-indigo-600">
+                          {formatCurrency(item.totalEstimatedAmount || 0)}
+                        </span>
+                      </div>
+                      <div>
+                        <span className="font-medium text-gray-700">
+                          Tiền cọc:
+                        </span>{" "}
+                        <span className="text-green-600">
+                          {formatCurrency(item.depositAmount || 0)}
+                        </span>
+                      </div>
+                      <div>
+                        <span className="font-medium text-gray-700">
+                          Còn lại:
+                        </span>{" "}
+                        <span className="text-orange-600">
+                          {formatCurrency(item.dueAmount || 0)}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Input Tình trạng xe */}
+                  <div>
+                    <label
+                      htmlFor={`condition-${item.vehicle.id}`}
+                      className="block text-sm font-medium text-gray-700 mb-1"
+                    >
+                      Tình trạng xe khi giao (ghi chú):
+                    </label>
+                    <textarea
+                      id={`condition-${item.vehicle.id}`}
+                      rows="2"
+                      value={item.conditionNotes}
+                      onChange={(e) =>
+                        handleConditionNotesChange(
+                          item.vehicle.id,
+                          e.target.value
+                        )
+                      }
+                      placeholder="Ví dụ: Trầy xước nhẹ cản trước, mức xăng còn 1 vạch,..."
+                      className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                    />
+                  </div>
+                </div>
               </div>
             </div>
           ))}
@@ -453,12 +529,11 @@ export const ContractDraft = () => {
                 onChange={handleNewCollateralChange}
                 placeholder="Mô tả tài sản (VD: CCCD 123xxx, Xe máy Dream biển số...)"
                 className="flex-grow p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-                // disabled={mode !== 'new'} // Không cần nữa vì đã có điều kiện ở handleNewCollateralChange
               />
               <button
                 onClick={handleAddCollateral}
                 className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 text-sm"
-                disabled={!newCollateralInput.trim() /* || mode !== 'new' */}
+                disabled={!newCollateralInput.trim()}
               >
                 Thêm
               </button>
@@ -475,8 +550,6 @@ export const ContractDraft = () => {
               Thông tin tài sản đảm bảo đã được ghi nhận từ đơn đặt trước.
             </p>
           )
-          // Hoặc nếu mode 'booking' mà originalContract.collaterals rỗng, bạn có thể muốn cho phép thêm mới
-          // Nhưng theo yêu cầu "không cho thêm sửa xoá", thì chỉ hiển thị.
         )}
         {/* Danh sách tài sản đã thêm */}
         {collaterals.length > 0 ? (
@@ -489,7 +562,7 @@ export const ContractDraft = () => {
                 } transition-all duration-200`}
               >
                 <span>{collateral}</span>
-                {mode === "new" && ( // Chỉ hiển thị nút xóa khi mode là 'new'
+                {mode === "new" && (
                   <button
                     onClick={() => handleRemoveCollateral(index)}
                     className="text-red-500 opacity-0 group-hover:opacity-100 transition-opacity text-xs ml-2 px-1 hover:bg-red-100 rounded"
@@ -514,11 +587,11 @@ export const ContractDraft = () => {
       {/* =========================================== */}
       <div className="mt-6 pt-6 border-t flex justify-end">
         <button
-          onClick={handleConfirmContract} // Gọi hàm xử lý cuối cùng
+          onClick={handleConfirmContract}
           className="px-8 py-3 bg-green-600 text-white font-bold rounded hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition duration-150 ease-in-out text-lg"
           disabled={
             isSaving ||
-            (mode === "new" && displayValues.totalEstimatedAmount <= 0) || // Cho mode new
+            (mode === "new" && displayValues.totalEstimatedAmount <= 0) ||
             vehiclesWithNotes.length === 0 ||
             collaterals.length === 0
           }

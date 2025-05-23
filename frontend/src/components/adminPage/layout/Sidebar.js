@@ -36,7 +36,7 @@ export const Sidebar = ({ isCollapsed }) => {
             </li>
             <li>
               <Link
-                to="/rental/customerSearch"
+                to="/rental/vehicles"
                 className="block px-4 py-2 hover:bg-gray-700 text-md"
               >
                 {!isCollapsed && "Rental"}

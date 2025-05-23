@@ -1,6 +1,7 @@
 import { useState, useCallback } from "react";
 import { useNavigate } from "react-router";
 import axios from "axios";
+
 export const SearchContractBooked = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [searchResults, setSearchResults] = useState([]);
@@ -26,7 +27,7 @@ export const SearchContractBooked = () => {
         if (Array.isArray(response.data) && response.data.length > 0) {
           setSearchResults(response.data);
         } else if (response.data.length === 0) {
-          setError("Không tìm thấy hợp đồng phù hợp.");
+          setError("Không tìm thấy hợp đồng đặt trước phù hợp.");
           setSearchResults([]);
         }
       } catch (error) {
@@ -36,42 +37,46 @@ export const SearchContractBooked = () => {
       }
     }, 500);
   }, [searchTerm]);
+
   const handleSelectContract = (contract) => {
     console.log("Selected contract:", contract);
     const transformedState = {
       customer: contract.customer,
-      searchParams: {
-        startDate: contract.startDate,
-        endDate: contract.endDate,
-      },
       selectedVehicles: contract.contractVehicleDetails.map((detail) => ({
         vehicle: detail.vehicle,
         conditionNotes:
           detail.vehicle.vehicleCondition || "Như hiện trạng khi đặt",
+        startDate: detail.startDate,
+        endDate: detail.endDate,
+        totalEstimatedAmount: detail.totalEstimatedAmount,
+        depositAmount: detail.depositAmount,
+        dueAmount: detail.dueAmount,
       })),
       originalContractData: contract,
       mode: "booking",
     };
     navigate("/rental/contract/draft", { state: transformedState });
   };
-  const handleGoToCustomerSearch = () => {
-    navigate(`/rental/customerSearch`);
+
+  const handleGoToVehicleSearch = () => {
+    navigate(`/rental/vehicles`);
   };
+
   return (
     <div className="container mx-auto p-4 space-y-6">
       <h1 className="text-2xl font-bold mb-4">
-        Khách hàng nhận xe/thuê xe tại chỗ
+        Xác nhận nhận xe từ đơn đặt trước
       </h1>
 
       <div className="p-4 border rounded shadow-sm bg-white">
         <div className="flex justify-between items-center gap-4 m-5">
-          <h2 className="text-xl font-semibold mb-3">Tìm Hợp đồng (Nhận xe)</h2>
+          <h2 className="text-xl font-semibold mb-3">Tìm đơn đặt trước</h2>
           <div className="flex gap-3">
             <button
-              onClick={handleGoToCustomerSearch}
-              className="px-4 py-2 bg-indigo-500 text-white rounded hover:bg-indigo-600 text-sm text-center whitespace-nowrap" // Màu khác, thêm whitespace-nowrap
+              onClick={handleGoToVehicleSearch}
+              className="px-4 py-2 bg-indigo-500 text-white rounded hover:bg-indigo-600 text-sm text-center whitespace-nowrap"
             >
-              Tìm Khách hàng (Thuê xe)
+              Tìm xe (Thuê xe)
             </button>
           </div>
         </div>
@@ -95,9 +100,9 @@ export const SearchContractBooked = () => {
 
       {error && <p className="mt-4 text-center text-red-600">Lỗi: {error}</p>}
       {searchResults.length > 0 && (
-        <div className="mt-8  mx-auto">
+        <div className="mt-8 mx-auto">
           <h3 className="text-xl font-medium mb-4 text-center">
-            Kết quả tìm kiếm:
+            Danh sách đơn đặt trước:
           </h3>
           <ul className="list-none p-0 space-y-4">
             {searchResults.map((contract) => (
@@ -114,33 +119,35 @@ export const SearchContractBooked = () => {
                       <strong>Khách hàng:</strong>{" "}
                       {contract.customer?.user?.fullName || "N/A"}
                     </div>
-                    <div className="mb-1 text-sm text-gray-600">
-                      <strong>Từ:</strong> {contract.startDate}{" "}
-                      <strong>Đến:</strong> {contract.endDate}
+                    <div className="mb-1">
+                      <strong>Số điện thoại:</strong>{" "}
+                      {contract.customer?.user?.phoneNumber || "N/A"}
                     </div>
                   </div>
                   <div>
                     <div className="mb-1">
                       <strong>Trạng thái:</strong>
-                      <span
-                        className={`ml-2 px-2 py-0.5 rounded text-xs font-medium ${
-                          contract.status === "ACTIVE"
-                            ? "bg-green-100 text-green-800"
-                            : "bg-yellow-100 text-yellow-800"
-                        }`}
-                      >
-                        {contract.status}
+                      <span className="ml-2 px-2 py-0.5 rounded text-xs font-medium bg-yellow-100 text-yellow-800">
+                        ĐÃ ĐẶT TRƯỚC
                       </span>
                     </div>
                     <div className="mb-2 text-sm">
                       <strong>Xe trong HĐ:</strong>
                       {contract.contractVehicleDetails &&
                       contract.contractVehicleDetails.length > 0 ? (
-                        <span className="ml-1 text-gray-700">
-                          {contract.contractVehicleDetails
-                            .map((detail) => detail.vehicle?.name || "Không rõ")
-                            .join(", ")}
-                        </span>
+                        <div className="ml-1 text-gray-700 flex flex-col gap-1">
+                          {contract.contractVehicleDetails.map(
+                            (detail, index) => (
+                              <div key={index}>
+                                {detail.vehicle?.name || "Không rõ"}{" "}
+                                <span className="text-gray-500">
+                                  (Từ ngày {detail.startDate} đến ngày{" "}
+                                  {detail.endDate})
+                                </span>
+                              </div>
+                            )
+                          )}
+                        </div>
                       ) : (
                         <span className="ml-1 text-gray-500 italic">
                           {" "}
@@ -150,9 +157,9 @@ export const SearchContractBooked = () => {
                     </div>
                     <button
                       onClick={() => handleSelectContract(contract)}
-                      className=" absolute right-2 bottom-2 mt-1 py-1 px-3 bg-indigo-500 text-white text-sm rounded hover:bg-indigo-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                      className="absolute right-2 bottom-2 mt-1 py-1 px-3 bg-indigo-500 text-white text-sm rounded hover:bg-indigo-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                     >
-                      Chọn hợp đồng này
+                      Xác nhận nhận xe
                     </button>
                   </div>
                 </div>

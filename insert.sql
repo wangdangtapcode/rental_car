@@ -53,10 +53,10 @@ VALUES
 (1, 'Toyota Innova', '51H-12345', 'Toyota', 'MPV', 7, 2020, 'Toyota Innova là dòng xe MPV rất phổ biến tại Việt Nam, được nhiều gia đình và doanh nghiệp tin dùng. Xe có thiết kế rộng rãi với 7 chỗ ngồi thoải mái, khoang hành lý lớn phù hợp cho những chuyến đi xa. Động cơ của Innova được đánh giá là bền bỉ, dễ bảo dưỡng. Ngoài ra, xe còn trang bị nhiều tính năng an toàn cơ bản, phù hợp với nhu cầu sử dụng hằng ngày. Đây là sự lựa chọn đáng tin cậy cho khách hàng muốn thuê xe gia đình.', 800000.0, 'GOOD', 'STORE', 'RENTED', null),
 (2, 'Honda CR-V', '51G-67890', 'Honda', 'SUV', 5, 2021, 'Honda CR-V mang lại trải nghiệm lái mượt mà và hiện đại. Xe có khoang nội thất tiện nghi, tích hợp nhiều công nghệ như hỗ trợ giữ làn, cảnh báo va chạm và phanh tự động. Không gian bên trong rộng rãi, ghế ngồi thoải mái cho cả 5 hành khách. CR-V có kiểu dáng thể thao, động cơ tiết kiệm nhiên liệu. Phù hợp với nhóm khách gia đình hoặc khách công tác dài ngày.', 1000000.0, 'EXCELLENT', 'STORE', 'RENTED', null),
 (3, 'Hyundai Accent', '51F-23456', 'Hyundai', 'Sedan', 5, 2019, 'Hyundai Accent là chiếc sedan nhỏ gọn lý tưởng cho các tuyến đường nội thành. Với thiết kế hiện đại và khả năng vận hành ổn định, Accent đáp ứng tốt nhu cầu đi lại cá nhân hoặc theo nhóm nhỏ. Xe có khả năng tiết kiệm nhiên liệu tốt, đồng thời nội thất được thiết kế tối ưu hóa không gian. Đây là mẫu xe phù hợp cho người mới lái hoặc khách cần di chuyển linh hoạt.', 600000.0, 'GOOD', 'STORE', 'RENTED', null),
-(4, 'Kia Seltos', '51E-78901', 'Kia', 'SUV', 5, 2022, 'Kia Seltos sở hữu ngoại hình bắt mắt với thiết kế trẻ trung, thể thao. Nội thất bên trong hiện đại, được trang bị màn hình giải trí trung tâm và hệ thống âm thanh sống động. Seltos phù hợp cho các chuyến đi du lịch hoặc công tác. Khả năng vận hành ổn định trên nhiều loại địa hình là một điểm mạnh lớn. Xe còn tích hợp nhiều tính năng an toàn như cảm biến, camera lùi.', 900000.0, 'EXCELLENT', 'STORE', 'ACTIVE', null),
-(5, 'Ford Ranger', '51D-34567', 'Ford', 'Pickup', 5, 2020, 'Ford Ranger là dòng bán tải mạnh mẽ, phù hợp cho những chuyến đi xa hoặc chuyên chở hàng hóa. Xe có động cơ Diesel bền bỉ, tiết kiệm nhiên liệu. Cabin rộng rãi, tiện nghi với các trang bị hiện đại như màn hình cảm ứng, điều hòa tự động. Ranger có khả năng vượt địa hình tốt, gầm cao giúp di chuyển dễ dàng ở vùng cao hay vùng ngập.', 1200000.0, 'GOOD', 'STORE', 'ACTIVE', null),
-(6, 'Mazda CX-5', '51C-89012', 'Mazda', 'SUV', 5, 2021, 'Mazda CX-5 nổi bật với thiết kế KODO sang trọng, tinh tế. Nội thất bọc da cao cấp, vô-lăng tích hợp nút điều khiển và hệ thống giải trí hiện đại. Xe vận hành êm ái, cách âm tốt, phù hợp cho khách hàng yêu cầu cao về trải nghiệm lái. CX-5 là lựa chọn tuyệt vời cho gia đình hoặc người đi công tác cần sự thoải mái và an toàn.', 950000.0, 'EXCELLENT', 'STORE', 'ACTIVE', null),
-(7, 'Toyota Vios', '51B-45678', 'Toyota', 'Sedan', 5, 2018, 'Toyota Vios là mẫu sedan được ưa chuộng nhiều năm liền nhờ độ bền cao và chi phí sử dụng thấp. Xe có thiết kế đơn giản nhưng hiệu quả, vận hành nhẹ nhàng trong đô thị. Nội thất tiện nghi cơ bản, phù hợp với nhu cầu di chuyển hàng ngày. Vios là lựa chọn hàng đầu cho người cần thuê xe giá rẻ và ổn định.', 550000.0, 'GOOD', 'STORE', 'ACTIVE', null),
+(4, 'Kia Seltos', '51E-78901', 'Kia', 'SUV', 5, 2022, 'Kia Seltos sở hữu ngoại hình bắt mắt với thiết kế trẻ trung, thể thao. Nội thất bên trong hiện đại, được trang bị màn hình giải trí trung tâm và hệ thống âm thanh sống động. Seltos phù hợp cho các chuyến đi du lịch hoặc công tác. Khả năng vận hành ổn định trên nhiều loại địa hình là một điểm mạnh lớn. Xe còn tích hợp nhiều tính năng an toàn như cảm biến, camera lùi.', 900000.0, 'EXCELLENT', 'STORE', 'RENTED', null),
+(5, 'Ford Ranger', '51D-34567', 'Ford', 'Pickup', 5, 2020, 'Ford Ranger là dòng bán tải mạnh mẽ, phù hợp cho những chuyến đi xa hoặc chuyên chở hàng hóa. Xe có động cơ Diesel bền bỉ, tiết kiệm nhiên liệu. Cabin rộng rãi, tiện nghi với các trang bị hiện đại như màn hình cảm ứng, điều hòa tự động. Ranger có khả năng vượt địa hình tốt, gầm cao giúp di chuyển dễ dàng ở vùng cao hay vùng ngập.', 1200000.0, 'GOOD', 'STORE', 'RENTED', null),
+(6, 'Mazda CX-5', '51C-89012', 'Mazda', 'SUV', 5, 2021, 'Mazda CX-5 nổi bật với thiết kế KODO sang trọng, tinh tế. Nội thất bọc da cao cấp, vô-lăng tích hợp nút điều khiển và hệ thống giải trí hiện đại. Xe vận hành êm ái, cách âm tốt, phù hợp cho khách hàng yêu cầu cao về trải nghiệm lái. CX-5 là lựa chọn tuyệt vời cho gia đình hoặc người đi công tác cần sự thoải mái và an toàn.', 950000.0, 'EXCELLENT', 'STORE', 'RENTED', null),
+(7, 'Toyota Vios', '51B-45678', 'Toyota', 'Sedan', 5, 2018, 'Toyota Vios là mẫu sedan được ưa chuộng nhiều năm liền nhờ độ bền cao và chi phí sử dụng thấp. Xe có thiết kế đơn giản nhưng hiệu quả, vận hành nhẹ nhàng trong đô thị. Nội thất tiện nghi cơ bản, phù hợp với nhu cầu di chuyển hàng ngày. Vios là lựa chọn hàng đầu cho người cần thuê xe giá rẻ và ổn định.', 550000.0, 'GOOD', 'STORE', 'RENTED', null),
 (8, 'VinFast Lux A2.0', '51A-90123', 'VinFast', 'Sedan', 5, 2020, 'VinFast Lux A2.0 mang lại trải nghiệm lái cao cấp nhờ khung gầm được phát triển từ BMW. Xe có nội thất rộng rãi, hệ thống giải trí cảm ứng, điều hòa tự động 2 vùng. Động cơ mạnh mẽ giúp xe tăng tốc nhanh, cảm giác lái đầm chắc. Đây là mẫu xe sedan cao cấp phù hợp với khách hàng doanh nhân hoặc người muốn trải nghiệm thương hiệu Việt.', 850000.0, 'GOOD', 'STORE', 'ACTIVE', null),
 (9, 'Mitsubishi Xpander', '51K-56789', 'Mitsubishi', 'MPV', 7, 2021, 'Mitsubishi Xpander được biết đến với khả năng chở 7 người thoải mái, thiết kế hiện đại và tiết kiệm nhiên liệu. Xe có khoang hành lý rộng, phù hợp cho gia đình hoặc nhóm du lịch. Nội thất bền bỉ, vận hành ổn định, giá thuê hợp lý. Đây là mẫu MPV phổ thông rất được ưa chuộng tại Việt Nam.', 750000.0, 'GOOD', 'STORE', 'ACTIVE', null),
 (10, 'Suzuki Ertiga', '51M-01234', 'Suzuki', 'MPV', 7, 2020, 'Suzuki Ertiga là mẫu xe 7 chỗ với giá thành hợp lý, thích hợp cho khách hàng thuê đi tỉnh hoặc đi du lịch cuối tuần. Xe có động cơ tiết kiệm, nội thất bố trí hợp lý, điều hòa 2 vùng cho hàng ghế sau. Ertiga nhẹ nhàng, dễ lái, phù hợp với nhu cầu sử dụng đơn giản.', 700000.0, 'GOOD', 'PARTNER', 'ACTIVE', 1),
@@ -67,52 +67,55 @@ VALUES
 (15, 'Mazda 3', '52E-45678', 'Mazda', 'Sedan', 5, 2020, 'Mazda 3 mang đậm phong cách thiết kế KODO sắc sảo, nội thất hiện đại như một chiếc xe sang. Hệ thống cách âm tốt, cảm giác lái mượt mà và tiết kiệm nhiên liệu. Đây là mẫu xe rất được ưa chuộng trong phân khúc sedan hạng C.', 750000.0, 'GOOD', 'PARTNER', 'INACTIVE', 6);
 
 -- Insert into payment_partners
-INSERT INTO payment_partners (id, period, total_rental_days, start_period, end_period, total_amout, status, created_date)
-VALUES
-(1, '2025-M1', 30, '2025-01-01', '2025-01-31', 15000000.0, 'APPROVED', '2025-02-01'),
-(2, '2025-M2', 30, '2025-02-01', '2025-02-27', 18000000.0, 'APPROVED', '2025-03-01'),
-(3, '2025-M3', 30, '2025-03-01', '2025-03-31', 20000000.0, 'APPROVED', '2025-04-01'),
-(4, '2025-M4', 30, '2025-04-01', '2025-04-30', 15000000.0, 'APPROVED', '2025-05-01'),
-(5, '2025-M5', 30, '2025-05-01', '2025-05-31', 18000000.0, 'APPROVED', '2025-06-01'),
-(6, '2025-M6', 30, '2025-03-01', '2025-06-30', 20000000.0, 'APPROVED', '2025-07-01');
+-- INSERT INTO payment_partners (id, period, total_rental_days, start_period, end_period, total_amout, status, created_date)
+-- VALUES
+-- (1, '2025-M1', 30, '2025-01-01', '2025-01-31', 15000000.0, 'APPROVED', '2025-02-01'),
+-- (2, '2025-M2', 30, '2025-02-01', '2025-02-27', 18000000.0, 'APPROVED', '2025-03-01'),
+-- (3, '2025-M3', 30, '2025-03-01', '2025-03-31', 20000000.0, 'APPROVED', '2025-04-01'),
+-- (4, '2025-M4', 30, '2025-04-01', '2025-04-30', 15000000.0, 'APPROVED', '2025-05-01'),
+-- (5, '2025-M5', 30, '2025-05-01', '2025-05-31', 18000000.0, 'APPROVED', '2025-06-01'),
+-- (6, '2025-M6', 30, '2025-03-01', '2025-06-30', 20000000.0, 'APPROVED', '2025-07-01');
 -- Insert into consignment_payments
-INSERT INTO consignment_payments (id, rental_days, payment_amount, consignment_contract_id, payment_partner_id)
-VALUES
-(1, 30, 5000000.0, 1, 1),
-(2, 30, 6000000.0, 2, 2),
-(3, 30, 4500000.0, 3, 3),
-(4, 30, 7000000.0, 4, 4),
-(5, 30, 5500000.0, 5, 5),
-(6, 30, 8000000.0, 6, 6);
+-- INSERT INTO consignment_payments (id, rental_days, payment_amount, consignment_contract_id, payment_partner_id)
+-- VALUES
+-- (1, 30, 5000000.0, 1, 1),
+-- (2, 30, 6000000.0, 2, 2),
+-- (3, 30, 4500000.0, 3, 3),
+-- (4, 30, 7000000.0, 4, 4),
+-- (5, 30, 5500000.0, 5, 5),
+-- (6, 30, 8000000.0, 6, 6);
 
 -- Rental Contract for Toyota Innova (800,000 * 3)
-INSERT INTO rental_contracts (id, start_date, end_date, created_date, deposit_amount, due_amount, total_estimated_amount, status, customer_id, employee_id)
-VALUES (1, '2025-05-09', '2025-05-12', '2025-05-09', 480000.0, 1920000.0, 2400000.0, 'BOOKING', 1, null);
+INSERT INTO rental_contracts (id, created_date, deposit_amount, due_amount, total_estimated_amount, status, customer_id, employee_id)
+VALUES (1,'2025-05-09', 480000.0, 1920000.0, 2400000.0, 'BOOKING', 1, null);
 
 -- Rental Contract for Honda CR-V (1,000,000 * 3)
-INSERT INTO rental_contracts (id, start_date, end_date, created_date, deposit_amount, due_amount, total_estimated_amount, status, customer_id, employee_id)
-VALUES (2, '2025-05-09', '2025-05-12', '2025-05-09', 600000.0, 2400000.0, 3000000.0, 'BOOKING', 2, null);
+INSERT INTO rental_contracts (id, created_date, deposit_amount, due_amount, total_estimated_amount, status, customer_id, employee_id)
+VALUES (2,'2025-05-09', 600000.0, 2400000.0, 3000000.0, 'BOOKING', 2, null);
 
 -- Rental Contract for Hyundai Accent (600,000 * 3)
-INSERT INTO rental_contracts (id, start_date, end_date, created_date, deposit_amount, due_amount, total_estimated_amount, status, customer_id, employee_id)
-VALUES (3, '2025-05-09', '2025-05-12', '2025-05-09', 360000.0, 1440000.0, 1800000.0, 'BOOKING', 3, null);
+INSERT INTO rental_contracts (id, created_date, deposit_amount, due_amount, total_estimated_amount, status, customer_id, employee_id)
+VALUES (3,'2025-05-09', 360000.0, 1440000.0, 1800000.0, 'BOOKING', 3, null);
 
--- Rental Contract for Kia Seltos (900,000 * 3)
-INSERT INTO rental_contracts (id, start_date, end_date, created_date, deposit_amount, due_amount, total_estimated_amount, status, customer_id, employee_id)
-VALUES (4, '2025-05-09', '2025-05-12', '2025-05-09', 540000.0, 2160000.0, 2700000.0, 'BOOKING', 4, 10);
+INSERT INTO rental_contracts (id, created_date, deposit_amount, due_amount, total_estimated_amount, status, customer_id, employee_id)
+VALUES (4,'2025-05-09', 840000.0, 3360000.0, 4200000.0, 'ACTIVE', 4, 11);
 
--- Rental Contract for Ford Ranger (1,200,000 * 3)
-INSERT INTO rental_contracts (id, start_date, end_date, created_date, deposit_amount, due_amount, total_estimated_amount, status, customer_id, employee_id)
-VALUES (5, '2025-05-09', '2025-05-12', '2025-05-09', 720000.0, 2880000.0, 3600000.0, 'BOOKING', 5, 10);
+-- Rental Contract for Honda CR-V (1,000,000 * 3)
+INSERT INTO rental_contracts (id, created_date, deposit_amount, due_amount, total_estimated_amount, status, customer_id, employee_id)
+VALUES (5,'2025-05-09', 600000.0, 2400000.0, 3000000.0, 'ACTIVE', 5, 11);
+
 
 -- Insert into contract_vehicle_details
-INSERT INTO contract_vehicle_details (id, rental_price, vehicle_id, rental_contract_id)
+INSERT INTO contract_vehicle_details (id, rental_price, start_date, end_date, total_estimated_amount, deposit_amount, due_amount, status, vehicle_id, rental_contract_id)
 VALUES
-(1, 800000.0, 1, 1),
-(2, 1000000.0, 2, 2),
-(3, 600000.0, 3, 3),
-(4, 900000.0, 4, 4),
-(5, 1200000.0, 5, 5);
+(1, 800000.0, '2025-05-09', '2025-05-11', 2400000.0, 480000.0, 1920000.0, 'BOOKING', 1, 1),
+(2, 1000000.0, '2025-05-09', '2025-05-11', 3000000.0, 600000.0, 2400000.0, 'BOOKING', 2, 2),
+(3, 600000.0, '2025-05-09', '2025-05-11', 1800000.0, 360000.0, 1440000.0, 'BOOKING', 3, 3),
+(4, 900000.0, '2025-05-09', '2025-05-10', 1800000.0, 360000.0, 1440000.0, 'ACTIVE', 4, 4),
+(5, 1200000.0, '2025-05-09', '2025-05-10', 2400000.0, 480000.0, 1920000.0, 'ACTIVE', 5, 4),
+(6, 950000.0, '2025-05-09', '2025-05-10', 1900000.0, 380000.0, 1520000.0, 'ACTIVE', 6, 5),
+(7, 550000.0, '2025-05-09', '2025-05-10', 1100000.0, 220000.0, 880000.0, 'ACTIVE', 7, 5);
+
 -- Insert into penalty_types
 INSERT INTO penalty_types (id, name, default_amount, description)
 VALUES
@@ -130,24 +133,23 @@ INSERT INTO penalties (id, penalty_amount, note, contract_vehicle_detail_id, pen
 VALUES
 (1, 500000.0, 'Chạy quá tốc độ', 1, 1),
 (2, 1000000.0, 'Vỡ gương chiếu hậu', 2, 2),
-(3, 200000.0, 'Trả xe muộn 1 ngày', 3, 3),
-(4, 500000.0, 'Đỗ xe sai quy định', 4, 1),
-(5, 1000000.0, 'Xước sơn thân xe', 5, 2),
-(6, 200000.0, 'Trả xe muộn 1 ngày', 6, 3);
+(3, 200000.0, 'Trả xe muộn 1 ngày', 3, 3);
+
 -- Insert into collaterals
 INSERT INTO collaterals (id, description, rental_contract_id)
 VALUES
 (1, 'CMND bản sao', 1),
 (2, 'Hộ khẩu bản sao', 2),
 (3, 'Sổ hồng bản sao', 3),
-(4, 'CMND bản sao', 4),
-(5, 'Bằng lái xe bản sao', 5);
+(4, 'Hộ khẩu bản sao',4),
+(5, 'CMND bản sao', 4),
+(6, 'CMND bản sao', 5),
+(7, 'Hộ khẩu bản sao',5)
+;
+
 -- Insert into invoice_details
-INSERT INTO invoice_details (id, payment_date, penalty_amount, due_amount, total_amount, rental_contract_id, employee_id)
+INSERT INTO invoice_details (id, payment_date, penalty_amount, due_amount, total_amount, employee_id, contract_vehicle_detail_id)
 VALUES
-(1, '2025-04-08', 500000.0, 1800000.0, 2300000.0, 1, 10),
-(2, '2025-04-16', 1000000.0, 1600000.0, 2600000.0, 2, 10),
-(3, '2025-04-26', 200000.0, 2150000.0, 2350000.0, 3, 10),
-(4, '2025-05-11', 500000.0, 1400000.0, 1900000.0, 4, 10),
-(5, '2025-05-21', 1000000.0, 700000.0, 1700000.0, 5, 10),
-(6, '2025-06-08', 0.0, 700000.0, 700000.0, 6, 10);
+(1, '2025-05-12', 500000.0, 1920000.0, 2420000.0, 10, 1),
+(2, '2025-05-12', 1000000.0, 2400000.0, 3400000.0, 10, 2),
+(3, '2025-05-12', 200000.0, 1440000.0, 1640000.0, 10, 3);

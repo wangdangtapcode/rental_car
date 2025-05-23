@@ -1,7 +1,5 @@
 package com.springboot.backend.Repository;
 
-import com.springboot.backend.DTO.CustomerInvoiceDetail;
-import com.springboot.backend.DTO.CustomerRevenue;
 import com.springboot.backend.Model.InvoiceDetail;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -61,4 +59,16 @@ public interface InvoiceDetailRepository extends JpaRepository<InvoiceDetail,Lon
             @Param("endDate") LocalDate endDate
     );
 
+    // Tìm hóa đơn theo ID chi tiết xe thuê
+    @Query("SELECT i FROM InvoiceDetail i WHERE i.contractVehicleDetail.id = :contractVehicleDetailId")
+    InvoiceDetail findByContractVehicleDetailId(@Param("contractVehicleDetailId") Long contractVehicleDetailId);
+    
+    // Tìm tất cả hóa đơn của một khách hàng
+    @Query("SELECT i FROM InvoiceDetail i " +
+            "JOIN i.contractVehicleDetail cvd " +
+            "JOIN cvd.rentalContract rc " +
+            "JOIN rc.customer c " +
+            "WHERE c.id = :customerId " +
+            "ORDER BY i.paymentDate DESC")
+    List<InvoiceDetail> findByCustomerId(@Param("customerId") Long customerId);
 }

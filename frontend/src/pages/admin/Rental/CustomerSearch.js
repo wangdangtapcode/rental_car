@@ -1,9 +1,13 @@
-import { useNavigate } from "react-router";
+import { useNavigate, useLocation } from "react-router";
 import { useState, useEffect } from "react";
 import axios from "axios";
 import { FaAngleRight } from "react-icons/fa";
+
 export const CustomerSearch = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const selectedVehicles = location.state?.selectedVehicles || [];
+
   // --- State cho Tìm kiếm Khách hàng ---
   const [searchTerm, setSearchTerm] = useState("");
   const [searchResults, setSearchResults] = useState([]);
@@ -112,10 +116,17 @@ export const CustomerSearch = () => {
       );
       console.log(response.data);
       if (response.data) {
+        alert("Thêm khách hàng thành công");
         setShowAddModal(false);
-        // navigate(`/rental/vehicles/${response.data.id}`, {
-        //   state: { customer: response.data }, // Chuyển dữ liệu khách hàng đến trang mới
-        // });
+        // Nếu có xe đã chọn, chuyển đến trang tạo hợp đồng với khách hàng mới
+        if (selectedVehicles.length > 0) {
+          const draftState = {
+            customer: response.data,
+            selectedVehicles: selectedVehicles,
+            mode: "new",
+          };
+          navigate("/rental/contract/draft", { state: draftState });
+        }
       }
     } catch (err) {
       setAddError("Lỗi khi thêm khách hàng. Vui lòng thử lại.");
@@ -127,16 +138,48 @@ export const CustomerSearch = () => {
   //
   const handleSelectCustomer = (customer) => {
     console.log("Selected customer:", customer);
-    navigate(`/rental/vehicles/${customer.id}`, { state: { customer } });
+
+    // Nếu có xe đã chọn, chuyển đến trang tạo hợp đồng
+    if (selectedVehicles.length > 0) {
+      const draftState = {
+        customer: customer,
+        selectedVehicles: selectedVehicles,
+        mode: "new",
+      };
+      navigate("/rental/contract/draft", { state: draftState });
+    } else {
+      // Nếu chưa chọn xe, chuyển đến trang chọn xe
+      navigate(`/rental/vehicles/${customer.id}`, { state: { customer } });
+    }
   };
-  const handleGoToBookingSearch = () => {
-    navigate("/rental/contractSearch");
+
+  const handleBackToVehicleSearch = () => {
+    navigate("/rental/vehicles", { state: { selectedVehicles } });
   };
+
   return (
     <div className="container mx-auto p-4 space-y-6">
       <h1 className="text-2xl font-bold mb-4">
         Khách hàng nhận xe/thuê xe tại chỗ
       </h1>
+
+      {selectedVehicles.length > 0 && (
+        <div className="bg-blue-100 border border-blue-300 text-blue-800 px-4 py-3 rounded mb-6">
+          <div className="flex justify-between items-center">
+            <div>
+              <span className="font-semibold">
+                Đã chọn {selectedVehicles.length} xe
+              </span>
+              <button
+                onClick={handleBackToVehicleSearch}
+                className="ml-4 text-sm text-blue-600 hover:underline font-medium"
+              >
+                ← Quay lại chọn xe
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="p-4 border rounded shadow-sm bg-white">
         <div className="flex justify-between items-center gap-4 m-5">
@@ -150,12 +193,6 @@ export const CustomerSearch = () => {
               className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 text-sm text-center whitespace-nowrap" // Thêm whitespace-nowrap
             >
               + Thêm Khách Hàng Mới
-            </button>
-            <button
-              onClick={handleGoToBookingSearch}
-              className="px-4 py-2 bg-indigo-500 text-white rounded hover:bg-indigo-600 text-sm text-center whitespace-nowrap" // Màu khác, thêm whitespace-nowrap
-            >
-              Tìm Đơn Đặt Online (Booking)
             </button>
           </div>
         </div>
@@ -205,121 +242,114 @@ export const CustomerSearch = () => {
         )}
       </div>
 
+      {/* Modal Thêm Khách Hàng Mới */}
       {showAddModal && (
-        <div
-          className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center p-4 z-50"
-          onClick={handleCloseAddModal}
-        >
-          <div
-            className="bg-white p-6 rounded-lg shadow-xl w-full max-w-md"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <h2 className="text-xl font-semibold mb-4">Thêm Khách Hàng Mới</h2>
-            {addError && (
-              <p className="text-red-500 text-sm mb-3">{addError}</p>
-            )}
-            <form onSubmit={handleAddFormSubmit} className="space-y-3">
-              <div>
-                <label
-                  htmlFor="fullName"
-                  className="block text-sm font-medium text-gray-700"
-                >
-                  Họ và Tên <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  id="fullName"
-                  name="fullName"
-                  value={newCustomerData.fullName}
-                  onChange={handleAddFormChange}
-                  required
-                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                />
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-md">
+            <h3 className="text-xl font-semibold mb-4">Thêm Khách Hàng Mới</h3>
+            <form onSubmit={handleAddFormSubmit}>
+              <div className="space-y-3">
+                <div>
+                  <label
+                    htmlFor="fullName"
+                    className="block text-sm font-medium text-gray-700"
+                  >
+                    Họ và tên
+                  </label>
+                  <input
+                    type="text"
+                    id="fullName"
+                    name="fullName"
+                    value={newCustomerData.fullName}
+                    onChange={handleAddFormChange}
+                    required
+                    className="mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  />
+                </div>
+                <div>
+                  <label
+                    htmlFor="email"
+                    className="block text-sm font-medium text-gray-700"
+                  >
+                    Email
+                  </label>
+                  <input
+                    type="email"
+                    id="email"
+                    name="email"
+                    value={newCustomerData.email}
+                    onChange={handleAddFormChange}
+                    required
+                    className="mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  />
+                </div>
+                <div>
+                  <label
+                    htmlFor="password"
+                    className="block text-sm font-medium text-gray-700"
+                  >
+                    Mật khẩu
+                  </label>
+                  <input
+                    type="password"
+                    id="password"
+                    name="password"
+                    value={newCustomerData.password}
+                    onChange={handleAddFormChange}
+                    required
+                    className="mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  />
+                </div>
+                <div>
+                  <label
+                    htmlFor="phoneNumber"
+                    className="block text-sm font-medium text-gray-700"
+                  >
+                    Số điện thoại
+                  </label>
+                  <input
+                    type="tel"
+                    id="phoneNumber"
+                    name="phoneNumber"
+                    value={newCustomerData.phoneNumber}
+                    onChange={handleAddFormChange}
+                    required
+                    className="mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  />
+                </div>
+                <div>
+                  <label
+                    htmlFor="address"
+                    className="block text-sm font-medium text-gray-700"
+                  >
+                    Địa chỉ
+                  </label>
+                  <input
+                    type="text"
+                    id="address"
+                    name="address"
+                    value={newCustomerData.address}
+                    onChange={handleAddFormChange}
+                    required
+                    className="mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  />
+                </div>
               </div>
-              <div>
-                <label
-                  htmlFor="email"
-                  className="block text-sm font-medium text-gray-700"
-                >
-                  Email
-                </label>
-                <input
-                  required
-                  type="email"
-                  id="email"
-                  name="email"
-                  value={newCustomerData.email}
-                  onChange={handleAddFormChange}
-                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                />
-              </div>
-              <div>
-                <label
-                  htmlFor="password"
-                  className="block text-sm font-medium text-gray-700"
-                >
-                  Password
-                </label>
-                <input
-                  required
-                  type="password"
-                  id="password"
-                  name="password"
-                  value={newCustomerData.password}
-                  onChange={handleAddFormChange}
-                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                />
-              </div>
-
-              <div>
-                <label
-                  htmlFor="phoneNumber"
-                  className="block text-sm font-medium text-gray-700"
-                >
-                  Số Điện Thoại <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="tel"
-                  id="phoneNumber"
-                  name="phoneNumber"
-                  value={newCustomerData.phoneNumber}
-                  onChange={handleAddFormChange}
-                  required
-                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                />
-              </div>
-              <div>
-                <label
-                  htmlFor="address"
-                  className="block text-sm font-medium text-gray-700"
-                >
-                  Địa chỉ
-                </label>
-                <textarea
-                  required
-                  id="address"
-                  name="address"
-                  value={newCustomerData.address}
-                  onChange={handleAddFormChange}
-                  rows="2"
-                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                ></textarea>
-              </div>
-              <div className="flex justify-end space-x-3 pt-3">
+              {addError && <p className="text-red-500 mt-3">{addError}</p>}
+              <div className="flex justify-end space-x-2 mt-4">
                 <button
                   type="button"
                   onClick={handleCloseAddModal}
-                  className="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300"
-                  disabled={isAddingCustomer}
+                  className="px-3 py-1 border rounded text-gray-700 hover:bg-gray-100"
                 >
                   Hủy
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50"
+                  className="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600"
                   disabled={isAddingCustomer}
                 >
-                  {isAddingCustomer ? "Đang lưu..." : "Lưu Khách Hàng"}
+                  {isAddingCustomer ? "Đang thêm..." : "Thêm khách hàng"}
                 </button>
               </div>
             </form>

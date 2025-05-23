@@ -19,11 +19,6 @@ public class RentalContract {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "start_date")
-    private LocalDate startDate;
-
-    @Column(name = "end_date")
-    private LocalDate endDate;
 
     @Column(name = "created_date")
     private LocalDate createdDate;
@@ -54,7 +49,7 @@ public class RentalContract {
     @JoinColumn(name = "employee_id")
     private Employee employee;
 
-    @OneToMany(mappedBy = "rentalContract")
-    @JsonIgnore
-    private List<InvoiceDetail> invoiceDetails;
+//    @OneToMany(mappedBy = "rentalContract")
+//    @JsonIgnore
+//    private List<InvoiceDetail> invoiceDetails;
 }

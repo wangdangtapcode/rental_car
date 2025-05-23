@@ -113,7 +113,7 @@ export const Invoice = () => {
       dueAmount: calculation.finalAmountDue,
       totalAmount: calculation.totalAmount,
       rentalContract: contractDetails,
-      employeeId: currentUser.id,
+      employee: currentUser,
     };
 
     console.log("Payload gửi đi để tạo InvoiceDetail:", invoicePayload);
@@ -239,7 +239,8 @@ export const Invoice = () => {
               {formatDate(contractDetails.endDate)}
             </p>
             <p className="mt-2">
-              <strong>NV tạo hóa đơn:</strong> {currentUser?.fullName || "N/A"}
+              <strong>NV tạo hóa đơn:</strong>{" "}
+              {currentUser?.user.fullName || "N/A"}
             </p>
             <p className="mt-1 text-xs text-gray-500">
               <strong>Ngày tạo hóa đơn:</strong>{" "}

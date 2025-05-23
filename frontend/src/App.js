@@ -27,6 +27,7 @@ import { ContractDraft } from "./pages/admin/Rental/Contract";
 import { SearchContractPage } from "./pages/admin/CompletedRental/SearchContract";
 import { ContractDetailPage } from "./pages/admin/CompletedRental/ContractDetail";
 import { Invoice } from "./pages/admin/CompletedRental/Invoice";
+import { SingleVehicleInvoice } from "./pages/admin/CompletedRental/SingleVehicleInvoice";
 import { SearchContractBooked } from "./pages/admin/Rental/SearchContractBooked";
 
 function App() {
@@ -53,10 +54,7 @@ function App() {
             element={<SearchContractBooked />}
           />
           {/* Tìm/Chọn Xe*/}
-          <Route
-            path="/rental/vehicles/:customerId"
-            element={<VehicleSearch />}
-          />
+          <Route path="/rental/vehicles" element={<VehicleSearch />} />
           <Route path="/rental/contract/draft" element={<ContractDraft />} />
           {/* Completed Rental*/}
           <Route path="/completedRental" element={<SearchContractPage />} />
@@ -68,6 +66,10 @@ function App() {
           <Route
             path="/completedRental/invoice/:contractId"
             element={<Invoice />}
+          />
+          <Route
+            path="/completedRental/invoice/single/:vehicleDetailId"
+            element={<SingleVehicleInvoice />}
           />
           {/*Management*/}
           {/*Customer Management*/}

@@ -39,7 +39,9 @@ export const SearchContractPage = () => {
   }, [searchTerm]);
 
   const handleSelectContract = (contract) => {
-    navigate(`/completedRental/contract/${contract.id}`, { state: { contract } });
+    navigate(`/completedRental/contract/${contract.id}`, {
+      state: { contract },
+    });
   };
 
   return (
@@ -121,11 +123,33 @@ export const SearchContractPage = () => {
                       <strong>Xe trong HĐ:</strong>
                       {contract.contractVehicleDetails &&
                       contract.contractVehicleDetails.length > 0 ? (
-                        <span className="ml-1 text-gray-700">
-                          {contract.contractVehicleDetails
-                            .map((detail) => detail.vehicle?.name || "Không rõ")
-                            .join(", ")}
-                        </span>
+                        <div className="ml-1 text-gray-700 mt-1">
+                          {contract.contractVehicleDetails.map((detail) => (
+                            <div
+                              key={detail.id}
+                              className="flex items-center mb-1"
+                            >
+                              <span className="mr-2">
+                                {detail.vehicle?.name || "Không rõ"}
+                              </span>
+                              {detail.status === "ACTIVE" && (
+                                <span className="px-2 py-0.5 bg-blue-100 text-blue-800 text-xs rounded">
+                                  Đang thuê
+                                </span>
+                              )}
+                              {detail.status === "PENDING_RETURN" && (
+                                <span className="px-2 py-0.5 bg-yellow-100 text-yellow-800 text-xs rounded">
+                                  Chờ thanh toán
+                                </span>
+                              )}
+                              {detail.status === "RETURNED" && (
+                                <span className="px-2 py-0.5 bg-green-100 text-green-800 text-xs rounded">
+                                  Đã trả
+                                </span>
+                              )}
+                            </div>
+                          ))}
+                        </div>
                       ) : (
                         <span className="ml-1 text-gray-500 italic">
                           {" "}

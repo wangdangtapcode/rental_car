@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @Entity
 @Getter
@@ -30,11 +31,14 @@ public class InvoiceDetail {
     @Column(name = "total_amount")
     private Float totalAmount;
 
-    @ManyToOne(cascade = {CascadeType.MERGE})
-    @JoinColumn(name = "rental_contract_id")
-    private RentalContract rentalContract;
+    // @ManyToOne(cascade = {CascadeType.MERGE})
+    // @JoinColumn(name = "rental_contract_id")
+    // private RentalContract rentalContract;
 
-    @ManyToOne(cascade = {CascadeType.MERGE, CascadeType.PERSIST})
+    @ManyToOne(cascade = { CascadeType.MERGE, CascadeType.PERSIST })
     @JoinColumn(name = "employee_id")
     private Employee employee;
+
+    @OneToMany(mappedBy = "invoiceDetail", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ContractVehicleDetail> contractVehicleDetails;
 }

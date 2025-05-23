@@ -7,11 +7,11 @@ import com.springboot.backend.Model.RentalContract;
 import com.springboot.backend.Service.InvoiceDetailService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -20,34 +20,48 @@ public class InvoiceDetailController {
     @Autowired
     private final  InvoiceDetailService invoiceDetailService;
 
-    @PostMapping(value = "/api/invoice/create")
-    public boolean createInvoiceDetail(@RequestBody Map<String, Object> invoicePayload) {
-        // Truy xuất dữ liệu từ Map
-        String paymentDate = (String) invoicePayload.get("paymentDate");
-        Float penaltyAmount = ((Number) invoicePayload.get("penaltyAmount")).floatValue();
-        Float dueAmount = ((Number) invoicePayload.get("dueAmount")).floatValue();
-        Float totalAmount = ((Number) invoicePayload.get("totalAmount")).floatValue();
-        Long employeeId = ((Number) invoicePayload.get("employeeId")).longValue();
-
-        // Sử dụng ObjectMapper từ Jackson để chuyển đổi dữ liệu
-        ObjectMapper mapper = new ObjectMapper();
-        mapper.registerModule(new JavaTimeModule());
-
-        // Chuyển đổi Map thành Invoice
-        InvoiceDetail invoice = new InvoiceDetail();
-        invoice.setPaymentDate(LocalDate.parse(paymentDate));
-        invoice.setPenaltyAmount(penaltyAmount);
-        invoice.setDueAmount(dueAmount);
-        invoice.setTotalAmount(totalAmount);
-
-        // Chuyển đổi contractDetails thành RentalContract
-        Map<String, Object> contractMap = (Map<String, Object>) invoicePayload.get("rentalContract");
-
-
-        RentalContract contract = mapper.convertValue(contractMap, RentalContract.class);
-
-        invoice.setRentalContract(contract);
-
-        return invoiceDetailService.createInvoiceDetail(invoice,employeeId);
+//    @PostMapping(value = "/api/invoice/create")
+//    public boolean createInvoiceDetail(@RequestBody InvoiceDetail invoicePayload) {
+//        return invoiceDetailService.createInvoiceDetail(invoicePayload);
+//    }
+    
+    // Endpoint mới để tạo hóa đơn cho xe riêng lẻ
+    @PostMapping(value = "/api/invoice/createSingle/{contractVehicleDetailId}")
+    public ResponseEntity<String> createSingleVehicleInvoice(
+            @PathVariable("contractVehicleDetailId") Long contractVehicleDetailId,
+            @RequestParam("employeeId") Long employeeId,
+            @RequestBody Map<String, Object> invoiceData) {
+        
+        boolean success = invoiceDetailService.createSingleVehicleInvoice(
+                contractVehicleDetailId, employeeId, invoiceData);
+        
+        if (success) {
+            return ResponseEntity.ok("Tạo hóa đơn thành công");
+        } else {
+            return ResponseEntity.badRequest().body("Tạo hóa đơn thất bại");
+        }
+    }
+    
+    // Lấy danh sách hóa đơn theo ID khách hàng
+    @GetMapping(value = "/api/invoice/customer/{customerId}")
+    public ResponseEntity<List<InvoiceDetail>> getInvoicesByCustomerId(
+            @PathVariable("customerId") Long customerId) {
+        
+        List<InvoiceDetail> invoices = invoiceDetailService.getInvoicesByCustomerId(customerId);
+        return ResponseEntity.ok(invoices);
+    }
+    
+    // Lấy hóa đơn theo ID chi tiết xe thuê
+    @GetMapping(value = "/api/invoice/vehicleDetail/{contractVehicleDetailId}")
+    public ResponseEntity<InvoiceDetail> getInvoiceByContractVehicleDetailId(
+            @PathVariable("contractVehicleDetailId") Long contractVehicleDetailId) {
+        
+        InvoiceDetail invoice = invoiceDetailService.getInvoiceByContractVehicleDetailId(contractVehicleDetailId);
+        
+        if (invoice != null) {
+            return ResponseEntity.ok(invoice);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
     }
 }

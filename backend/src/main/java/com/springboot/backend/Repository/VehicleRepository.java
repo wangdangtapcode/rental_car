@@ -18,10 +18,14 @@ public interface VehicleRepository extends JpaRepository<Vehicle,Long> {
             " ORDER BY RAND() LIMIT :count", nativeQuery = true)
     List<Vehicle> findRandomToViewHome(@Param("count") int count);
 
-    @Query(value = "SELECT * FROM vehicles v " +
-            "WHERE v.status = 'ACTIVE' " +
-            "AND EXISTS (SELECT 1 FROM vehicle_images vi " +
-            "WHERE vi.vehicle_id = v.id AND vi.is_thumbnail = true)"
-            , nativeQuery = true)
-    List<Vehicle> findVehicleActiveAll();
+//    @Query(value = "SELECT * FROM vehicles v " +
+//            "WHERE v.status = 'ACTIVE' " +
+//            "AND EXISTS (SELECT 1 FROM vehicle_images vi " +
+//            "WHERE vi.vehicle_id = v.id AND vi.is_thumbnail = true)"
+//            , nativeQuery = true)
+//    List<Vehicle> findVehicleActiveAll();
+@Query(value = "SELECT * FROM vehicles v " +
+        "WHERE v.status = 'ACTIVE' "
+        , nativeQuery = true)
+List<Vehicle> findVehicleActiveAll();
 }

@@ -1,18 +1,14 @@
-import { useLocation, useNavigate, useParams } from "react-router";
-import { useState, useEffect, useCallback } from "react";
+import { useLocation, useNavigate } from "react-router";
+import { useState, useCallback } from "react";
 import axios from "axios";
 import { formatCurrency } from "../../../utils/formatters";
+
 export const VehicleSearch = () => {
-  const { customerId } = useParams();
   const location = useLocation();
   const navigate = useNavigate();
 
-  const initialCustomer = location.state?.customer;
-  const [customer, setCustomer] = useState(initialCustomer);
-  const [isLoadingCustomer, setIsLoadingCustomer] = useState(!initialCustomer);
   const [error, setError] = useState(null);
   // xe
-
   const [availableVehicles, setAvailableVehicles] = useState([]);
   const [selectedVehicles, setSelectedVehicles] = useState([]);
   const [isLoadingVehicles, setIsLoadingVehicles] = useState(false);
@@ -87,17 +83,24 @@ export const VehicleSearch = () => {
     [searchParams, selectedVehicles]
   );
   //
-  const handleSelectVehicleClick = useCallback((vehicle) => {
-    setSelectedVehicles((prev) => [
-      ...prev,
-      {
-        vehicle: vehicle,
-        conditionNotes: vehicle.vehicleCondition || "Như hiện trạng",
-      },
-    ]);
+  const handleSelectVehicleClick = useCallback(
+    (vehicle) => {
+      setSelectedVehicles((prev) => [
+        ...prev,
+        {
+          vehicle: vehicle,
+          conditionNotes: vehicle.vehicleCondition || "Như hiện trạng",
+          startDate: searchParams.startDate,
+          endDate: searchParams.endDate,
+        },
+      ]);
 
-    setAvailableVehicles((prev) => prev.filter((v) => v.id !== vehicle.id));
-  }, []);
+      // Sau khi chọn xe, ẩn danh sách xe (reset trạng thái tìm kiếm)
+      setDidSearchVehicle(false);
+      setAvailableVehicles([]);
+    },
+    [searchParams]
+  );
   //
   const handleRemoveVehicleClick = useCallback(
     (vehicleId) => {
@@ -125,318 +128,301 @@ export const VehicleSearch = () => {
     },
     [selectedVehicles, didSearchVehicle]
   );
-  //
-  const handleGoToDraft = () => {
-    if (
-      customer &&
-      selectedVehicles.length > 0 &&
-      searchParams.startDate &&
-      searchParams.endDate
-    ) {
-      const draftState = {
-        customer: customer,
-        selectedVehicles: selectedVehicles,
-        searchParams: searchParams,
-      };
-      navigate("/rental/contract/draft", { state: draftState });
-    } else {
-      setError("Vui lòng chọn ít nhất một xe và đảm bảo có ngày thuê hợp lệ.");
+
+  // Cập nhật ngày thuê cho xe đã chọn
+  const handleVehicleDateChange = useCallback((vehicleId, field, value) => {
+    setSelectedVehicles((prev) =>
+      prev.map((item) => {
+        if (item.vehicle.id === vehicleId) {
+          return {
+            ...item,
+            [field]: value,
+          };
+        }
+        return item;
+      })
+    );
+  }, []);
+
+  const handleContinueToCustomer = () => {
+    // Kiểm tra dữ liệu hợp lệ
+    let hasError = false;
+
+    // Kiểm tra đã chọn xe chưa
+    if (selectedVehicles.length === 0) {
+      setError("Vui lòng chọn ít nhất một xe.");
+      return;
     }
+
+    // Kiểm tra từng xe có ngày bắt đầu và kết thúc hợp lệ không
+    for (const vehicle of selectedVehicles) {
+      if (!vehicle.startDate || !vehicle.endDate) {
+        setError("Vui lòng chọn ngày bắt đầu và kết thúc cho từng xe.");
+        hasError = true;
+        break;
+      }
+
+      if (new Date(vehicle.startDate) >= new Date(vehicle.endDate)) {
+        setError(
+          `Xe ${vehicle.vehicle.name} có ngày bắt đầu phải trước ngày kết thúc.`
+        );
+        hasError = true;
+        break;
+      }
+    }
+
+    if (hasError) return;
+
+    // Chuyển đến trang tìm khách hàng với thông tin xe đã chọn
+    navigate("/rental/customerSearch", {
+      state: {
+        selectedVehicles: selectedVehicles,
+        mode: "new",
+      },
+    });
+  };
+  const handleGoToBookingSearch = () => {
+    navigate("/rental/contractSearch");
+  };
+  // Hàm hỗ trợ hiển thị ảnh xe
+  const getThumbnailImage = (vehicle) => {
+    if (vehicle.vehicleImages && vehicle.vehicleImages.length > 0) {
+      const thumbnail = vehicle.vehicleImages.find((img) => img.isThumbnail);
+      if (thumbnail && thumbnail.imageUri) {
+        return (
+          <img
+            src={thumbnail.imageUri}
+            alt={vehicle.name}
+            className="w-full h-32 object-cover rounded mb-2"
+          />
+        );
+      }
+    }
+
+    return (
+      <div className="w-full h-32 bg-gray-200 rounded flex items-center justify-center mb-2">
+        <span className="text-gray-400 text-xs text-center">Không có ảnh</span>
+      </div>
+    );
   };
 
-  //
-  if (isLoadingCustomer) {
-    return (
-      <div className="container mx-auto p-4">
-        Đang tải thông tin khách hàng...
-      </div>
-    );
-  }
-  if (error && !customer) {
-    return (
-      <div className="container mx-auto p-4">
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-          {error}
-        </div>
-        <button
-          onClick={() => navigate("/rental/customerSearch")}
-          className="text-blue-600 hover:underline"
-        >
-          Quay lại chọn khách hàng
-        </button>
-      </div>
-    );
-  }
-  if (!customer) {
-    console.warn("VehicleRentalPage rendered without customer data.");
-    return (
-      <div className="container mx-auto p-4">
-        Không có thông tin khách hàng.{" "}
-        <button
-          onClick={() => navigate("/rental/customerSearch")}
-          className="text-blue-600 hover:underline"
-        >
-          Quay lại
-        </button>
-      </div>
-    );
-  }
   return (
     <div className="container mx-auto p-4 space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold mb-2">
-          Chọn Xe theo yêu cầu của Khách Hàng
-        </h1>
-        <div className="bg-blue-100 border border-blue-300 text-blue-800 px-4 py-3 rounded mb-6 flex justify-between items-center">
-          <div>
-            <span className="font-semibold">Khách hàng:</span>{" "}
-            {customer.user.fullName} ({customer.user.phoneNumber})
-          </div>
-          <button
-            onClick={() => navigate("/rental/customerSearch")}
-            className="text-sm text-blue-600 hover:underline font-medium"
-          >
-            Chọn KH khác
-          </button>
-        </div>
-      </div>
-
-      {error && (
-        <div
-          className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4"
-          role="alert"
+      <div className="flex justify-between items-center">
+        <h1 className="text-2xl font-bold mb-4">Tìm kiếm xe</h1>
+        <button
+          onClick={handleGoToBookingSearch}
+          className="px-4 py-2 bg-indigo-500 text-white rounded hover:bg-indigo-600 text-sm text-center whitespace-nowrap" // Màu khác, thêm whitespace-nowrap
         >
-          {error}
-        </div>
-      )}
+          Tìm Đơn Đặt Online (Booking)
+        </button>
+      </div>
 
       <div className="p-4 border rounded shadow-sm bg-white">
-        <h2 className="text-xl font-semibold mb-3">Tìm Xe Theo Ngày</h2>
-        <form
-          onSubmit={handleSearchSubmit}
-          className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end"
-        >
-          <div>
-            <label
-              htmlFor="startDate"
-              className="block text-sm font-medium text-gray-700"
-            >
-              Ngày bắt đầu
-            </label>
-            <input
-              type="date"
-              id="startDate"
-              name="startDate"
-              value={searchParams.startDate}
-              onChange={handleDateChange}
-              required
-              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-            />
-          </div>
-          <div>
-            <label
-              htmlFor="endDate"
-              className="block text-sm font-medium text-gray-700"
-            >
-              Ngày kết thúc
-            </label>
-            <input
-              type="date"
-              id="endDate"
-              name="endDate"
-              value={searchParams.endDate}
-              onChange={handleDateChange}
-              required
-              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-            />
-          </div>
-          <button
-            type="submit"
-            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50 h-10"
-            disabled={isLoadingVehicles} // Vô hiệu hóa khi đang tìm
-          >
-            {isLoadingVehicles ? "Đang tìm..." : "Tìm Xe"}
-          </button>
-        </form>
-      </div>
+        <div className="flex justify-between items-center">
+          <h2 className="text-xl font-semibold">Thông tin thuê xe</h2>
+        </div>
 
-      <div className="mt-6 border rounded shadow-sm bg-white p-4">
-        <h3 className="text-lg font-medium text-gray-800 mb-2">
-          Kết quả tìm kiếm xe phù hợp:
-        </h3>
-        {isLoadingVehicles && (
-          <p className="text-gray-500">Đang tải danh sách xe...</p>
+        <form onSubmit={handleSearchSubmit} className="mt-4 space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-1">
+              <label htmlFor="startDate" className="block font-medium">
+                Ngày bắt đầu:
+              </label>
+              <input
+                type="date"
+                id="startDate"
+                name="startDate"
+                value={searchParams.startDate}
+                onChange={handleDateChange}
+                className="w-full p-2 border rounded focus:ring-blue-500 focus:border-blue-500"
+                min={new Date().toISOString().split("T")[0]}
+              />
+            </div>
+
+            <div className="space-y-1">
+              <label htmlFor="endDate" className="block font-medium">
+                Ngày kết thúc:
+              </label>
+              <input
+                type="date"
+                id="endDate"
+                name="endDate"
+                value={searchParams.endDate}
+                onChange={handleDateChange}
+                className="w-full p-2 border rounded focus:ring-blue-500 focus:border-blue-500"
+                min={
+                  searchParams.startDate ||
+                  new Date().toISOString().split("T")[0]
+                }
+              />
+            </div>
+          </div>
+
+          <div className="flex justify-end">
+            <button
+              type="submit"
+              className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+              disabled={isLoadingVehicles}
+            >
+              {isLoadingVehicles ? "Đang tìm..." : "Tìm xe"}
+            </button>
+          </div>
+        </form>
+
+        {error && (
+          <div className="mt-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
+            {error}
+          </div>
         )}
-        {!isLoadingVehicles && !didSearchVehicle && (
-          <p className="text-gray-500">Nhập ngày thuê và bấm "Tìm Xe".</p>
-        )}
-        {!isLoadingVehicles &&
-          didSearchVehicle &&
-          availableVehicles.length === 0 && (
-            <p className="text-gray-500">
-              Không tìm thấy xe nào phù hợp hoặc còn trống trong khoảng thời
-              gian này.
-            </p>
-          )}
+
+        {/* Danh sách xe đã chọn */}
         {selectedVehicles.length > 0 && (
-          <div className="mt-6 border rounded shadow-sm bg-white p-4">
-            <h3 className="text-lg font-medium text-gray-800 mb-2">
-              Xe đã chọn ({selectedVehicles.length}):
-            </h3>
-            <div className="space-y-3 max-h-96 overflow-y-auto pr-2">
+          <div className="mt-6">
+            <h3 className="text-lg font-semibold mb-3">Xe đã chọn</h3>
+            <div className="space-y-3 max-h-96 overflow-y-auto">
               {selectedVehicles.map((item) => (
                 <div
-                  key={`selected-${item.vehicle.id}`}
-                  className="border rounded p-3 flex flex-col md:flex-row justify-between md:items-center bg-gray-50 shadow-sm"
+                  key={item.vehicle.id}
+                  className="p-3 border rounded flex flex-col md:flex-row justify-between gap-3 bg-blue-50"
                 >
-                  <div className="mr-3 flex-shrink-0 w-24 h-24 md:w-32 md:h-32">
-                    {item.vehicle.vehicleImages &&
-                    item.vehicle.vehicleImages.length > 0 ? (
-                      (() => {
-                        const thumbnail = item.vehicle.vehicleImages.find(
-                          (img) => img.isThumbnail
-                        );
-                        return (
-                          thumbnail &&
-                          thumbnail.imageUri && (
-                            <img
-                              src={thumbnail.imageUri}
-                              alt={thumbnail.name}
-                              className="w-full h-full object-cover rounded"
-                            />
-                          )
-                        );
-                      })()
-                    ) : (
-                      <div className="w-full h-full bg-gray-200 rounded flex items-center justify-center">
-                        <span className="text-gray-400 text-xs text-center">
-                          Không có ảnh
-                        </span>
-                      </div>
-                    )}
+                  <div className="md:w-32 mb-2 md:mb-0">
+                    {getThumbnailImage(item.vehicle)}
+                  </div>
+                  <div className="flex-1">
+                    <div className="font-medium">{item.vehicle.name}</div>
+                    <div className="text-sm">
+                      Biển số: {item.vehicle.licensePlate}
+                    </div>
+                    <div className="text-sm">
+                      Giá thuê: {formatCurrency(item.vehicle.rentalPrice)}/ngày
+                    </div>
+                    <div className="text-sm text-gray-600">
+                      {item.conditionNotes}
+                    </div>
                   </div>
 
-                  <div className="flex-grow mb-2 md:mb-0 md:mr-4">
-                    <p className="font-semibold text-lg">
-                      {item.vehicle.name}{" "}
-                      <span className="text-sm font-normal text-gray-600">
-                        ({item.vehicle.manufactureYear})
-                      </span>
-                    </p>
-                    <p className="text-sm text-gray-700">
-                      Biển số:{" "}
-                      <span className="font-medium">
-                        {item.vehicle.licensePlate}
-                      </span>
-                    </p>
-                    <p className="text-sm text-gray-700">
-                      Giá thuê/ngày:{" "}
-                      <span className="font-bold text-indigo-600">
-                        {formatCurrency(item.vehicle.rentalPrice)}
-                      </span>
-                    </p>
-                    <p className="text-xs text-gray-500 mt-1">
-                      Ghi chú: {item.vehicle.vehicleCondition}
-                    </p>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                    <div>
+                      <label
+                        htmlFor={`start-${item.vehicle.id}`}
+                        className="block text-sm font-medium"
+                      >
+                        Ngày bắt đầu
+                      </label>
+                      <input
+                        type="date"
+                        id={`start-${item.vehicle.id}`}
+                        value={item.startDate}
+                        onChange={(e) =>
+                          handleVehicleDateChange(
+                            item.vehicle.id,
+                            "startDate",
+                            e.target.value
+                          )
+                        }
+                        className="w-full p-1 border rounded text-sm"
+                        min={new Date().toISOString().split("T")[0]}
+                      />
+                    </div>
+                    <div>
+                      <label
+                        htmlFor={`end-${item.vehicle.id}`}
+                        className="block text-sm font-medium"
+                      >
+                        Ngày kết thúc
+                      </label>
+                      <input
+                        type="date"
+                        id={`end-${item.vehicle.id}`}
+                        value={item.endDate}
+                        onChange={(e) =>
+                          handleVehicleDateChange(
+                            item.vehicle.id,
+                            "endDate",
+                            e.target.value
+                          )
+                        }
+                        className="w-full p-1 border rounded text-sm"
+                        min={item.startDate}
+                      />
+                    </div>
                   </div>
+
                   <button
                     onClick={() => handleRemoveVehicleClick(item.vehicle.id)}
-                    className="px-3 py-1 rounded text-white text-sm bg-red-500 hover:bg-red-600 transition duration-150 ease-in-out"
+                    className="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600 self-center"
                   >
-                    Bỏ Chọn
+                    Xóa
                   </button>
                 </div>
               ))}
             </div>
-          </div>
-        )}
-        {!isLoadingVehicles && availableVehicles.length > 0 && (
-          <div className=" mt-20 space-y-3 max-h-[500px] overflow-y-auto pr-2">
-            {availableVehicles.map((vehicle) => (
-              <div
-                key={`available-${vehicle.id}`}
-                className="border rounded p-3 flex flex-col md:flex-row justify-between md:items-center bg-white shadow-sm hover:shadow-md transition-shadow"
+
+            <div className="mt-4 flex justify-end">
+              <button
+                onClick={handleContinueToCustomer}
+                className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
               >
-                <div className="mr-3 flex-shrink-0 w-24 h-24 md:w-32 md:h-32">
-                  {vehicle.vehicleImages && vehicle.vehicleImages.length > 0 ? (
-                    (() => {
-                      const thumbnail = vehicle.vehicleImages.find(
-                        (img) => img.isThumbnail
-                      );
-                      return (
-                        thumbnail &&
-                        thumbnail.imageUri && (
-                          <img
-                            src={thumbnail.imageUri}
-                            alt={vehicle.name}
-                            className="w-full h-full object-cover rounded"
-                          />
-                        )
-                      );
-                    })()
-                  ) : (
-                    <div className="w-full h-full bg-gray-200 rounded flex items-center justify-center">
-                      <span className="text-gray-400 text-xs text-center">
-                        Không có ảnh
-                      </span>
-                    </div>
-                  )}
-                </div>
-                <div className="flex-grow mb-2 md:mb-0 md:mr-4">
-                  <p className="font-semibold text-lg">
-                    {vehicle.name}{" "}
-                    <span className="text-sm font-normal text-gray-600">
-                      ({vehicle.manufactureYear})
-                    </span>
-                  </p>
-                  <p className="text-sm text-gray-700">
-                    Biển số:{" "}
-                    <span className="font-medium">{vehicle.licensePlate}</span>
-                  </p>
-                  <p className="text-sm text-gray-700">
-                    Hãng: {vehicle.brand} - Loại: {vehicle.type} - Số chỗ:{" "}
-                    {vehicle.seatCount}
-                  </p>
-                  <p className="text-sm text-gray-700">
-                    Giá thuê/ngày:{" "}
-                    <span className="font-bold text-indigo-600">
-                      {formatCurrency(vehicle.rentalPrice)}
-                    </span>
-                  </p>
-                  {vehicle.ownerType === "CONSIGNMENT" && (
-                    <span className="text-xs font-semibold bg-orange-100 text-orange-700 px-2 py-0.5 rounded-full">
-                      Xe ký gửi
-                    </span>
-                  )}
-                  {vehicle.description && (
-                    <p className="text-xs text-gray-500 mt-1">
-                      Mô tả:{" "}
-                      {vehicle.description.length > 50
-                        ? `${vehicle.description.substring(0, 50)}...`
-                        : vehicle.description}
-                    </p>
-                  )}
-                </div>
-
-                <button
-                  onClick={() => handleSelectVehicleClick(vehicle)}
-                  className="px-3 py-1 rounded text-white text-sm bg-blue-500 hover:bg-blue-600 transition duration-150 ease-in-out"
-                >
-                  Chọn Xe
-                </button>
-              </div>
-            ))}
+                Tiếp tục - Chọn khách hàng
+              </button>
+            </div>
           </div>
         )}
 
-        {selectedVehicles.length > 0 && (
-          <div className="mt-6 text-right">
-            <button
-              onClick={handleGoToDraft}
-              className="px-6 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition duration-150 ease-in-out"
-            >
-              Tiến tới Tạo Hợp Đồng ({selectedVehicles.length} xe)
-            </button>
+        {/* Danh sách xe có sẵn */}
+        {didSearchVehicle && (
+          <div className="mt-6">
+            <h3 className="text-lg font-semibold mb-3">Xe có sẵn</h3>
+            {isLoadingVehicles ? (
+              <p className="text-gray-500">Đang tìm xe...</p>
+            ) : availableVehicles.length === 0 ? (
+              <p className="text-gray-500">
+                Không tìm thấy xe phù hợp thêm trong khoảng thời gian này.
+              </p>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 max-h-96 overflow-y-auto">
+                {availableVehicles.map((vehicle) => (
+                  <div
+                    key={vehicle.id}
+                    className="border rounded p-3 hover:bg-gray-50"
+                  >
+                    {getThumbnailImage(vehicle)}
+                    <div className="font-medium">{vehicle.name}</div>
+                    <div className="text-sm mb-2">
+                      <span
+                        className={`inline-block px-2 py-1 rounded text-xs ${
+                          vehicle.ownerType === "STORE"
+                            ? "bg-blue-100 text-blue-800"
+                            : "bg-purple-100 text-purple-800"
+                        }`}
+                      >
+                        {vehicle.ownerType === "STORE" ? "Cửa hàng" : "Đối tác"}
+                      </span>
+                      <span className="ml-2">{vehicle.type}</span>
+                      <span className="ml-2">{vehicle.brand}</span>
+                    </div>
+                    <div className="text-sm">
+                      Biển số: {vehicle.licensePlate}
+                    </div>
+                    <div className="text-sm">
+                      Số chỗ: {vehicle.seatCount} chỗ
+                    </div>
+                    <div className="text-sm font-medium text-green-600 mb-2">
+                      Giá thuê: {formatCurrency(vehicle.rentalPrice)}/ngày
+                    </div>
+                    <div className="flex justify-end">
+                      <button
+                        onClick={() => handleSelectVehicleClick(vehicle)}
+                        className="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 text-sm"
+                      >
+                        Chọn xe
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         )}
       </div>
