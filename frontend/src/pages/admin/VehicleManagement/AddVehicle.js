@@ -14,7 +14,6 @@ export const AddVehicle = () => {
     rentalPrice: "",
     vehicleCondition: "",
     ownerType: "STORE",
-    status: "ACTIVE",
     vehicleImages: [],
   });
   const [thumbnailIndex, setThumbnailIndex] = useState(null);
@@ -174,33 +173,6 @@ export const AddVehicle = () => {
             rows="5"
             className="w-full mt-1 px-4 py-2 border rounded focus:outline-none focus:ring focus:ring-blue-200"
           ></textarea>
-        </div>
-        <div className="mt-4 col-span-2 text-md text-lg">
-          <div className="flex items-center space-x-2 mt-4">
-            <label className="mb-2">Trạng thái:</label>
-            <div className="flex space-x-6">
-              <label className="flex items-center space-x-2">
-                <input
-                  type="radio"
-                  name="status"
-                  value="ACTIVE"
-                  checked={vehicle.status === "ACTIVE"}
-                  onChange={handleChange}
-                />
-                <span>Hoạt động</span>
-              </label>
-              <label className="flex items-center space-x-2">
-                <input
-                  type="radio"
-                  name="status"
-                  value="INACTIVE"
-                  checked={vehicle.status === "INACTIVE"}
-                  onChange={handleChange}
-                />
-                <span>Ngưng hoạt động</span>
-              </label>
-            </div>
-          </div>
         </div>
       </div>
 

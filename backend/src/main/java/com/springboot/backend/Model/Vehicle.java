@@ -48,9 +48,6 @@ public class Vehicle {
     @Column(name = "owner_type")
     private String ownerType;
 
-    @Column(name = "status",columnDefinition = "varchar(255) default 'ACTIVE'")
-    private String status;
-
     @ManyToOne
     @JsonIgnore
     @JoinColumn(name = "consignment_contract_id")
@@ -60,6 +57,7 @@ public class Vehicle {
     @JsonIgnore
     private List<ContractVehicleDetail> contractVehicleDetails;
 
-    @OneToMany(mappedBy = "vehicle",cascade = {CascadeType.PERSIST, CascadeType.MERGE,CascadeType.REMOVE}, orphanRemoval = true)
+    @OneToMany(mappedBy = "vehicle", cascade = { CascadeType.PERSIST, CascadeType.MERGE,
+            CascadeType.REMOVE }, orphanRemoval = true)
     private List<VehicleImage> vehicleImages;
 }

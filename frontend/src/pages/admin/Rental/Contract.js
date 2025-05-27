@@ -51,14 +51,10 @@ export const ContractDraft = () => {
             // Tính tài chính
             const price = Number(vehicle.vehicle?.rentalPrice);
             const totalAmount = price * diffDays;
-            const depositAmount = totalAmount * 0.2; // 20% tiền cọc
-            const dueAmount = totalAmount - depositAmount;
 
             return {
               ...vehicle,
               totalEstimatedAmount: totalAmount,
-              depositAmount: depositAmount,
-              dueAmount: dueAmount,
             };
           }
         );
@@ -90,15 +86,9 @@ export const ContractDraft = () => {
       0
     );
 
-    const totalDeposit = vehiclesWithNotes.reduce(
-      (sum, item) => sum + (item.depositAmount || 0),
-      0
-    );
+    const totalDeposit = totalEstimated * 0.2;
 
-    const totalDue = vehiclesWithNotes.reduce(
-      (sum, item) => sum + (item.dueAmount || 0),
-      0
-    );
+    const totalDue = totalEstimated - totalDeposit;
 
     return {
       total: totalEstimated,
@@ -211,17 +201,12 @@ export const ContractDraft = () => {
         createdDate: formattedCreatedDate,
         status: "ACTIVE",
         contractVehicleDetails: vehiclesWithNotes.map((item) => ({
-          vehicle: {
-            ...item.vehicle,
-            vehicleCondition: item.conditionNotes,
-            status: "RENTED",
-          },
+          vehicle: item.vehicle,
+          conditionNotes: item.conditionNotes,
           rentalPrice: item.vehicle.rentalPrice,
           startDate: item.startDate,
           endDate: item.endDate,
           totalEstimatedAmount: item.totalEstimatedAmount,
-          depositAmount: item.depositAmount,
-          dueAmount: item.dueAmount,
           status: "ACTIVE",
         })),
         collaterals: collaterals.map((desc) => ({ description: desc })),
@@ -234,10 +219,8 @@ export const ContractDraft = () => {
         employee: user,
         status: "ACTIVE",
         contractVehicleDetails: vehiclesWithNotes.map((item) => ({
-          vehicle: {
-            ...item.vehicle,
-            vehicleCondition: item.conditionNotes,
-          },
+          vehicle: item.vehicle,
+          conditionNotes: item.conditionNotes,
           status: "ACTIVE",
         })),
       };
@@ -466,22 +449,6 @@ export const ContractDraft = () => {
                         </span>{" "}
                         <span className="text-indigo-600">
                           {formatCurrency(item.totalEstimatedAmount || 0)}
-                        </span>
-                      </div>
-                      <div>
-                        <span className="font-medium text-gray-700">
-                          Tiền cọc:
-                        </span>{" "}
-                        <span className="text-green-600">
-                          {formatCurrency(item.depositAmount || 0)}
-                        </span>
-                      </div>
-                      <div>
-                        <span className="font-medium text-gray-700">
-                          Còn lại:
-                        </span>{" "}
-                        <span className="text-orange-600">
-                          {formatCurrency(item.dueAmount || 0)}
                         </span>
                       </div>
                     </div>

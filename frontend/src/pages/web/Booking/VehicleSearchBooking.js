@@ -3,7 +3,7 @@ import { useState, useCallback } from "react";
 import axios from "axios";
 import { formatCurrency } from "../../../utils/formatters";
 
-export const VehicleSearch = () => {
+export const VehicleSearchBooking = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -53,7 +53,7 @@ export const VehicleSearch = () => {
 
       try {
         const response = await axios.get(
-          "http://localhost:8081/api/vehicle/available",
+          "http://localhost:8081/api/vehicle/all",
           {
             params: {
               startDate: searchParams.startDate,
@@ -181,9 +181,6 @@ export const VehicleSearch = () => {
       },
     });
   };
-  const handleGoToBookingSearch = () => {
-    navigate("/rental/contractSearch");
-  };
   // Hàm hỗ trợ hiển thị ảnh xe
   const getThumbnailImage = (vehicle) => {
     if (vehicle.vehicleImages && vehicle.vehicleImages.length > 0) {
@@ -210,12 +207,6 @@ export const VehicleSearch = () => {
     <div className="container mx-auto p-4 space-y-6">
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold mb-4">Tìm kiếm xe</h1>
-        <button
-          onClick={handleGoToBookingSearch}
-          className="px-4 py-2 bg-indigo-500 text-white rounded hover:bg-indigo-600 text-sm text-center whitespace-nowrap" // Màu khác, thêm whitespace-nowrap
-        >
-          Tìm Đơn Đặt Online (Booking)
-        </button>
       </div>
 
       <div className="p-4 border rounded shadow-sm bg-white">
@@ -381,7 +372,7 @@ export const VehicleSearch = () => {
                 Không tìm thấy xe phù hợp thêm trong khoảng thời gian này.
               </p>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 ">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 max-h-96 overflow-y-auto">
                 {availableVehicles.map((vehicle) => (
                   <div
                     key={vehicle.id}

@@ -15,6 +15,7 @@ export const ContractDetailPage = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [returningVehicle, setReturningVehicle] = useState(null);
+  const [selectedVehicles, setSelectedVehicles] = useState([]);
 
   const fetchData = useCallback(async () => {
     setIsLoading(true);
@@ -29,24 +30,14 @@ export const ContractDetailPage = () => {
         return;
       }
 
-      // Fetch active vehicles for this contract
-      const activeVehiclesResp = await axios.get(
-        `http://localhost:8081/api/rentalContract/${contractData.id}/activeVehicles`
-      );
-
       const penaltyResp = await axios.get(
         "http://localhost:8081/api/penalty-types/all"
       );
       const typesData = penaltyResp.data;
-      console.log("Dữ liệu hợp đồng:", contractData);
-      console.log("Dữ liệu loại phạt:", typesData);
-      console.log("Xe đang hoạt động:", activeVehiclesResp.data);
 
       setContractDetails(contractData);
       setPenaltyTypes(typesData);
-      setVehiclesInContract(
-        activeVehiclesResp.data || contractData.contractVehicleDetails || []
-      );
+      setVehiclesInContract(contractData.contractVehicleDetails || []);
     } catch (err) {
       console.error("Lỗi khi tải dữ liệu:", err);
       setError(
@@ -55,7 +46,7 @@ export const ContractDetailPage = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [contractId, location.state, navigate]);
+  }, [location.state, navigate]);
 
   useEffect(() => {
     fetchData();
@@ -65,7 +56,7 @@ export const ContractDetailPage = () => {
     setVehiclesInContract((prevVehicles) =>
       prevVehicles.map((vehicleDetail) => {
         if (vehicleDetail.id === contractVehicleDetailId) {
-          return {
+          const updatedVehicle = {
             ...vehicleDetail,
             penalties: [
               ...vehicleDetail.penalties,
@@ -78,6 +69,12 @@ export const ContractDetailPage = () => {
               },
             ],
           };
+          setSelectedVehicles((prevSelected) =>
+            prevSelected.map((v) =>
+              v.id === contractVehicleDetailId ? updatedVehicle : v
+            )
+          );
+          return updatedVehicle;
         }
         return vehicleDetail;
       })
@@ -89,12 +86,18 @@ export const ContractDetailPage = () => {
       setVehiclesInContract((prevVehicles) =>
         prevVehicles.map((vehicleDetail) => {
           if (vehicleDetail.id === contractVehicleDetailId) {
-            return {
+            const updatedVehicle = {
               ...vehicleDetail,
               penalties: vehicleDetail.penalties.filter(
                 (p) => p.tempId !== tempPenaltyId
               ),
             };
+            setSelectedVehicles((prevSelected) =>
+              prevSelected.map((v) =>
+                v.id === contractVehicleDetailId ? updatedVehicle : v
+              )
+            );
+            return updatedVehicle;
           }
           return vehicleDetail;
         })
@@ -108,7 +111,7 @@ export const ContractDetailPage = () => {
       setVehiclesInContract((prevVehicles) =>
         prevVehicles.map((vehicleDetail) => {
           if (vehicleDetail.id === contractVehicleDetailId) {
-            return {
+            const updatedVehicle = {
               ...vehicleDetail,
               penalties: vehicleDetail.penalties.map((penalty) => {
                 if (penalty.tempId === tempPenaltyId) {
@@ -141,6 +144,12 @@ export const ContractDetailPage = () => {
                 return penalty;
               }),
             };
+            setSelectedVehicles((prevSelected) =>
+              prevSelected.map((v) =>
+                v.id === contractVehicleDetailId ? updatedVehicle : v
+              )
+            );
+            return updatedVehicle;
           }
           return vehicleDetail;
         })
@@ -149,118 +158,69 @@ export const ContractDetailPage = () => {
     [penaltyTypes]
   );
 
-  // Function to handle returning a single vehicle
-  const handleReturnSingleVehicle = useCallback((vehicleDetail) => {
-    setReturningVehicle(vehicleDetail);
-    setVehiclesInContract((prevVehicles) =>
-      prevVehicles.map((vd) => {
-        if (vd.id === vehicleDetail.id) {
-          return {
-            ...vd,
-            penalties: vd.penalties || [],
-            isReturning: true,
-            actualReturnDate: new Date().toISOString().split("T")[0],
-          };
-        }
-        return vd;
-      })
-    );
-  }, []);
-
-  // Function to confirm a single vehicle return
-  const confirmVehicleReturn = useCallback(
-    async (vehicleDetail) => {
-      try {
-        if (!currentUser || !currentUser.id) {
-          setError("Bạn cần đăng nhập để thực hiện thao tác này");
-          return;
-        }
-
-        const returnData = {
-          returnDate: vehicleDetail.actualReturnDate,
-          penalties: vehicleDetail.penalties.map((p) => ({
-            penaltyTypeId: p.penaltyType.id,
-            amount: p.penaltyAmount,
-            note: p.note,
-          })),
+  const handleVehicleSelect = (vehicleDetail) => {
+    setSelectedVehicles((prev) => {
+      const isSelected = prev.some((v) => v.id === vehicleDetail.id);
+      if (isSelected) {
+        return prev.filter((v) => v.id !== vehicleDetail.id);
+      } else {
+        const updatedVehicle = {
+          ...vehicleDetail,
+          actualReturnDate: new Date().toISOString().split("T")[0],
         };
 
-        // Gửi yêu cầu kiểm tra và xác nhận xe được trả (chưa tạo hóa đơn)
-        const response = await axios.post(
-          `http://localhost:8081/api/rentalContract/returnVehicle/${vehicleDetail.id}?employeeId=${currentUser.id}`,
-          returnData
+        setVehiclesInContract((prev) =>
+          prev.map((v) => (v.id === vehicleDetail.id ? updatedVehicle : v))
         );
 
-        if (response.data === "Trả xe thành công") {
-          // Cập nhật trạng thái xe trong state
-          const updatedVehicleDetail = {
-            ...vehicleDetail,
-            status: "PENDING_RETURN",
-          };
-
-          // Chuyển đến trang tạo hóa đơn để xác nhận thanh toán
-          navigate(`/completedRental/invoice/single/${vehicleDetail.id}`, {
-            state: {
-              vehicleDetail: updatedVehicleDetail,
-              contract: contractDetails,
-            },
-          });
-        } else {
-          setError("Có lỗi xảy ra khi kiểm tra xe. Vui lòng thử lại.");
-        }
-      } catch (err) {
-        console.error("Lỗi khi trả xe:", err);
-        setError("Không thể trả xe. Vui lòng thử lại sau.");
+        return [...prev, updatedVehicle];
       }
-    },
-    [contractDetails, navigate, currentUser]
-  );
-
-  // Function to cancel returning a vehicle
-  const cancelVehicleReturn = useCallback((vehicleDetailId) => {
-    setVehiclesInContract((prevVehicles) =>
-      prevVehicles.map((vd) => {
-        if (vd.id === vehicleDetailId) {
-          const { isReturning, ...rest } = vd;
-          return rest;
-        }
-        return vd;
-      })
-    );
-    setReturningVehicle(null);
-  }, []);
-
-  const goToSummaryPage = () => {
-    let hasIncompletePenalty = false;
-    vehiclesInContract.forEach((vd) => {
-      vd.penalties.forEach((p) => {
-        if (!p.penaltyType || !p.penaltyAmount || p.penaltyAmount <= 0) {
-          hasIncompletePenalty = true;
-        }
-      });
     });
-    if (hasIncompletePenalty) {
-      setError(
-        "Vui lòng chọn loại phạt và nhập số tiền phạt hợp lệ (> 0) cho tất cả các lỗi đã thêm."
-      );
+  };
+
+  const handleSelectAllActive = () => {
+    const activeVehicles = vehiclesInContract.filter(
+      (v) => v.status === "ACTIVE"
+    );
+    const updatedVehicles = activeVehicles.map((v) => ({
+      ...v,
+      actualReturnDate: new Date().toISOString().split("T")[0],
+    }));
+    setSelectedVehicles(updatedVehicles);
+    setVehiclesInContract(updatedVehicles);
+  };
+
+  const handleDeselectAll = () => {
+    setSelectedVehicles([]);
+  };
+
+  const handleReturnSelectedVehicles = () => {
+    if (selectedVehicles.length === 0) {
+      setError("Vui lòng chọn ít nhất một xe để trả");
       return;
     }
-    setError(null);
+
+    const allVehiclesInContract = contractDetails.contractVehicleDetails || [];
+    const allVehiclesReturned = allVehiclesInContract.every((contractVehicle) =>
+      selectedVehicles.some(
+        (selectedVehicle) => selectedVehicle.id === contractVehicle.id
+      )
+    );
 
     const updatedContract = {
-      ...contractDetails,
-      status: "COMPLETED",
-      contractVehicleDetails: vehiclesInContract.map((vehicleDetail) => ({
-        ...vehicleDetail,
-        penalties: (vehicleDetail.penalties || []).map((penalty) => {
-          const { tempId, isDirty, ...cleanPenalty } = penalty;
-          return cleanPenalty;
-        }),
+      contract: {
+        ...contractDetails,
+        isAllVehiclesReturned: allVehiclesReturned,
+      },
+      selectedVehicles: selectedVehicles.map((v) => ({
+        ...v,
+        penalties: v.penalties.map((p) => ({
+          note: p.note,
+          penaltyAmount: p.penaltyAmount,
+          penaltyType: p.penaltyType,
+        })),
       })),
     };
-
-    console.log("Dữ liệu phạt sẽ được chuyển:", updatedContract);
-
     navigate(`/completedRental/invoice/${contractId}`, {
       state: { contract: updatedContract },
     });
@@ -296,16 +256,15 @@ export const ContractDetailPage = () => {
               <span className="font-semibold text-gray-600">Khách hàng:</span>{" "}
               {contractDetails.customer?.user?.fullName || "N/A"}
             </p>
-
-            <p>
-              <span className="font-semibold text-gray-600">Ngày bắt đầu:</span>{" "}
-              {contractDetails.startDate}
-            </p>
             <p>
               <span className="font-semibold text-gray-600">
-                Ngày kết thúc:
+                Số điện thoại:
               </span>{" "}
-              {contractDetails.endDate}
+              {contractDetails.customer?.user?.phoneNumber || "N/A"}
+            </p>
+            <p>
+              <span className="font-semibold text-gray-600">Địa chỉ:</span>{" "}
+              {contractDetails.customer?.user?.address || "N/A"}
             </p>
             <p>
               <span className="font-semibold text-gray-600">Trạng thái:</span>
@@ -334,21 +293,9 @@ export const ContractDetailPage = () => {
           <div className="space-y-2">
             <p>
               <span className="font-semibold text-gray-600">
-                Tiền cọc đã trả:
-              </span>{" "}
-              {contractDetails.depositAmount?.toLocaleString() || 0} VND
-            </p>
-            <p>
-              <span className="font-semibold text-gray-600">
                 Tổng Tiền ước tính:
               </span>{" "}
               {contractDetails.totalEstimatedAmount?.toLocaleString() || 0} VND
-            </p>
-            <p>
-              <span className="font-semibold text-gray-600">
-                Tiền còn phải trả:
-              </span>{" "}
-              {contractDetails.dueAmount?.toLocaleString() || 0} VND
             </p>
             <div>
               <span className="font-semibold text-gray-600">
@@ -378,6 +325,34 @@ export const ContractDetailPage = () => {
         </div>
       )}
 
+      <div className="mb-4 flex justify-between items-center">
+        <div className="space-x-2">
+          <button
+            onClick={handleSelectAllActive}
+            className="px-3 py-1 bg-blue-500 text-white text-sm rounded hover:bg-blue-600"
+          >
+            Chọn trả tất cả xe
+          </button>
+          <button
+            onClick={handleDeselectAll}
+            className="px-3 py-1 bg-gray-500 text-white text-sm rounded hover:bg-gray-600"
+          >
+            Bỏ chọn tất cả
+          </button>
+        </div>
+        <button
+          onClick={handleReturnSelectedVehicles}
+          disabled={selectedVehicles.length === 0}
+          className={`px-4 py-2 ${
+            selectedVehicles.length === 0
+              ? "bg-gray-400 cursor-not-allowed"
+              : "bg-green-500 hover:bg-green-600"
+          } text-white rounded`}
+        >
+          Trả {selectedVehicles.length} xe đã chọn
+        </button>
+      </div>
+
       {vehiclesInContract.length > 0 ? (
         vehiclesInContract.map((vehicleDetail) => (
           <div
@@ -385,45 +360,36 @@ export const ContractDetailPage = () => {
             className="mb-6 p-4 border border-gray-200 rounded-lg shadow-sm"
           >
             <div className="flex justify-between items-start mb-4">
-              <h4 className="text-md font-medium text-gray-800">
-                {vehicleDetail.vehicle?.name} -{" "}
-                {vehicleDetail.vehicle?.licensePlate}
-              </h4>
+              <div className="flex items-center">
+                {vehicleDetail.status === "ACTIVE" ? (
+                  <input
+                    type="checkbox"
+                    checked={selectedVehicles.some(
+                      (v) => v.id === vehicleDetail.id
+                    )}
+                    onChange={() => handleVehicleSelect(vehicleDetail)}
+                    className="mr-3 h-5 w-5"
+                  />
+                ) : (
+                  <div className="mr-3 h-5 w-5" /> // Placeholder for alignment
+                )}
+                <h4 className="text-md font-medium text-gray-800">
+                  {vehicleDetail.vehicle?.name} -{" "}
+                  {vehicleDetail.vehicle?.licensePlate}
+                </h4>
+              </div>
               <div className="flex space-x-2">
-                {vehicleDetail.status === "ACTIVE" &&
-                  !vehicleDetail.isReturning && (
-                    <button
-                      onClick={() => handleReturnSingleVehicle(vehicleDetail)}
-                      className="px-3 py-1 bg-blue-500 text-white text-sm rounded hover:bg-blue-600"
-                    >
-                      Trả Xe Này
-                    </button>
-                  )}
-                {vehicleDetail.status === "PENDING_RETURN" &&
-                  !vehicleDetail.isReturning && (
-                    <button
-                      onClick={() =>
-                        navigate(
-                          `/completedRental/invoice/single/${vehicleDetail.id}`,
-                          {
-                            state: {
-                              vehicleDetail,
-                              contract: contractDetails,
-                            },
-                          }
-                        )
-                      }
-                      className="px-3 py-1 bg-green-500 text-white text-sm rounded hover:bg-green-600"
-                    >
-                      Thanh Toán Xe Này
-                    </button>
-                  )}
+                {vehicleDetail.status === "ACTIVE" && (
+                  <span className="px-3 py-1 bg-blue-100 text-blue-800 text-sm rounded">
+                    Đang thuê
+                  </span>
+                )}
                 {vehicleDetail.status === "PENDING_RETURN" && (
                   <span className="px-3 py-1 bg-yellow-100 text-yellow-800 text-sm rounded">
                     Đang Chờ Thanh Toán
                   </span>
                 )}
-                {vehicleDetail.status === "RETURNED" && (
+                {vehicleDetail.status === "COMPLETED" && (
                   <span className="px-3 py-1 bg-green-100 text-green-800 text-sm rounded">
                     Đã Trả Ngày{" "}
                     {new Date(
@@ -434,162 +400,217 @@ export const ContractDetailPage = () => {
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4 text-sm mb-4">
-              <div>
-                <span className="font-medium">Ngày thuê:</span>{" "}
-                {vehicleDetail.startDate
-                  ? new Date(vehicleDetail.startDate).toLocaleDateString(
-                      "vi-VN"
-                    )
-                  : "N/A"}
+            {/* Thông tin xe và ảnh */}
+            <div className="grid grid-cols-3 gap-4 mb-4">
+              <div className="col-span-1">
+                {vehicleDetail.vehicle?.vehicleImages &&
+                vehicleDetail.vehicle.vehicleImages.length > 0 ? (
+                  <div className="relative h-48 rounded-lg overflow-hidden">
+                    <img
+                      src={vehicleDetail.vehicle.vehicleImages[0].imageUri}
+                      alt={vehicleDetail.vehicle.name}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                ) : (
+                  <div className="h-48 bg-gray-100 rounded-lg flex items-center justify-center">
+                    <span className="text-gray-400">Không có ảnh</span>
+                  </div>
+                )}
               </div>
-              <div>
-                <span className="font-medium">Ngày trả dự kiến:</span>{" "}
-                {vehicleDetail.endDate
-                  ? new Date(vehicleDetail.endDate).toLocaleDateString("vi-VN")
-                  : "N/A"}
+              <div className="col-span-2">
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <span className="font-medium">Ngày bắt đầu:</span>{" "}
+                    {vehicleDetail.startDate
+                      ? new Date(vehicleDetail.startDate).toLocaleDateString(
+                          "vi-VN"
+                        )
+                      : "N/A"}
+                  </div>
+                  <div>
+                    <span className="font-medium">Ngày kết thúc:</span>{" "}
+                    {vehicleDetail.endDate
+                      ? new Date(vehicleDetail.endDate).toLocaleDateString(
+                          "vi-VN"
+                        )
+                      : "N/A"}
+                  </div>
+                  <div>
+                    <span className="font-medium">Giá thuê/ngày:</span>{" "}
+                    {vehicleDetail.rentalPrice?.toLocaleString() || 0} VND
+                  </div>
+                  <div>
+                    <span className="font-medium">Số ngày thuê:</span>{" "}
+                    {vehicleDetail.startDate && vehicleDetail.endDate
+                      ? Math.ceil(
+                          (new Date(vehicleDetail.endDate) -
+                            new Date(vehicleDetail.startDate)) /
+                            (1000 * 60 * 60 * 24)
+                        ) + 1
+                      : 0}{" "}
+                    ngày
+                  </div>
+                  <div>
+                    <span className="font-medium">Tổng tiền ước tính:</span>{" "}
+                    {vehicleDetail.totalEstimatedAmount?.toLocaleString() || 0}{" "}
+                    VND
+                  </div>
+                </div>
               </div>
             </div>
 
-            {vehicleDetail.isReturning && (
-              <div className="mt-4 p-3 border border-blue-200 rounded-lg bg-blue-50">
-                <h5 className="font-medium text-blue-800 mb-3">
-                  Thông tin trả xe
-                </h5>
+            {/* Chỉ hiển thị form trả xe cho xe đang ACTIVE */}
+            {vehicleDetail.status === "ACTIVE" &&
+              selectedVehicles.some((v) => v.id === vehicleDetail.id) && (
+                <div className="mt-4 p-3 border border-blue-200 rounded-lg bg-blue-50">
+                  <h5 className="font-medium text-blue-800 mb-3">
+                    Thông tin trả xe
+                  </h5>
+                  <p className="text-sm text-gray-600 mb-3">
+                    {selectedVehicles.length ===
+                    vehiclesInContract.filter((v) => v.status === "ACTIVE")
+                      .length
+                      ? "Trả tất cả xe còn lại - Sẽ áp dụng tiền cọc"
+                      : "Trả một phần xe - Không áp dụng tiền cọc"}
+                  </p>
 
-                <div className="mb-3">
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Ngày trả thực tế:
-                  </label>
-                  <input
-                    type="date"
-                    value={vehicleDetail.actualReturnDate}
-                    onChange={(e) => {
-                      setVehiclesInContract((prev) =>
-                        prev.map((vd) =>
-                          vd.id === vehicleDetail.id
-                            ? { ...vd, actualReturnDate: e.target.value }
-                            : vd
-                        )
-                      );
-                    }}
-                    className="border rounded px-2 py-1 w-full"
-                  />
-                </div>
+                  <div className="mb-3">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Ngày trả thực tế:
+                    </label>
+                    <input
+                      type="date"
+                      value={
+                        vehicleDetail.actualReturnDate ||
+                        new Date().toISOString().split("T")[0]
+                      }
+                      onChange={(e) => {
+                        const newDate = e.target.value;
+                        setVehiclesInContract((prev) =>
+                          prev.map((vd) => {
+                            if (vd.id === vehicleDetail.id) {
+                              return {
+                                ...vd,
+                                actualReturnDate: newDate,
+                              };
+                            }
+                            return vd;
+                          })
+                        );
+                        setSelectedVehicles((prevSelected) =>
+                          prevSelected.map((v) => {
+                            if (v.id === vehicleDetail.id) {
+                              return {
+                                ...v,
+                                actualReturnDate: newDate,
+                              };
+                            }
+                            return v;
+                          })
+                        );
+                      }}
+                      className="border rounded px-2 py-1 w-full"
+                    />
+                  </div>
 
-                <h5 className="font-medium text-gray-700 mb-2">
-                  Các lỗi vi phạm (nếu có)
-                </h5>
+                  <h5 className="font-medium text-gray-700 mb-2">
+                    Các lỗi vi phạm (nếu có)
+                  </h5>
 
-                {vehicleDetail.penalties &&
-                  vehicleDetail.penalties.map((penalty, idx) => (
-                    <div
-                      key={penalty.tempId || idx}
-                      className="mb-3 p-2 border border-gray-200 rounded bg-white"
-                    >
-                      <div className="grid grid-cols-2 gap-3 mb-2">
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Loại lỗi:
-                          </label>
-                          <select
-                            className="border rounded px-2 py-1 w-full"
-                            value={penalty.penaltyType?.id || ""}
-                            onChange={(e) =>
-                              handlePenaltyChange(
+                  {vehicleDetail.penalties &&
+                    vehicleDetail.penalties.map((penalty, idx) => (
+                      <div
+                        key={penalty.tempId || idx}
+                        className="mb-3 p-2 border border-gray-200 rounded bg-white"
+                      >
+                        <div className="grid grid-cols-2 gap-3 mb-2">
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                              Loại lỗi:
+                            </label>
+                            <select
+                              className="border rounded px-2 py-1 w-full"
+                              value={penalty.penaltyType?.id || ""}
+                              onChange={(e) =>
+                                handlePenaltyChange(
+                                  vehicleDetail.id,
+                                  penalty.tempId,
+                                  "penaltyType",
+                                  e.target.value
+                                )
+                              }
+                            >
+                              <option value="">Chọn loại lỗi</option>
+                              {penaltyTypes.map((type) => (
+                                <option key={type.id} value={type.id}>
+                                  {type.name} (
+                                  {type.defaultAmount.toLocaleString()} VND)
+                                </option>
+                              ))}
+                            </select>
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                              Tiền phạt (VND):
+                            </label>
+                            <input
+                              type="number"
+                              className="border rounded px-2 py-1 w-full"
+                              value={penalty.penaltyAmount || 0}
+                              onChange={(e) =>
+                                handlePenaltyChange(
+                                  vehicleDetail.id,
+                                  penalty.tempId,
+                                  "penaltyAmount",
+                                  e.target.value
+                                )
+                              }
+                            />
+                          </div>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <div className="flex-grow">
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                              Ghi chú:
+                            </label>
+                            <input
+                              type="text"
+                              className="border rounded px-2 py-1 w-full"
+                              value={penalty.note || ""}
+                              onChange={(e) =>
+                                handlePenaltyChange(
+                                  vehicleDetail.id,
+                                  penalty.tempId,
+                                  "note",
+                                  e.target.value
+                                )
+                              }
+                            />
+                          </div>
+                          <button
+                            onClick={() =>
+                              handleRemovePenalty(
                                 vehicleDetail.id,
-                                penalty.tempId,
-                                "penaltyType",
-                                e.target.value
+                                penalty.tempId
                               )
                             }
+                            className="ml-2 mt-5 px-2 py-1 bg-red-100 text-red-700 rounded hover:bg-red-200"
                           >
-                            <option value="">Chọn loại lỗi</option>
-                            {penaltyTypes.map((type) => (
-                              <option key={type.id} value={type.id}>
-                                {type.name} (
-                                {type.defaultAmount.toLocaleString()} VND)
-                              </option>
-                            ))}
-                          </select>
-                        </div>
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Tiền phạt (VND):
-                          </label>
-                          <input
-                            type="number"
-                            className="border rounded px-2 py-1 w-full"
-                            value={penalty.penaltyAmount || 0}
-                            onChange={(e) =>
-                              handlePenaltyChange(
-                                vehicleDetail.id,
-                                penalty.tempId,
-                                "penaltyAmount",
-                                e.target.value
-                              )
-                            }
-                          />
+                            Xóa
+                          </button>
                         </div>
                       </div>
-                      <div className="flex justify-between items-center">
-                        <div className="flex-grow">
-                          <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Ghi chú:
-                          </label>
-                          <input
-                            type="text"
-                            className="border rounded px-2 py-1 w-full"
-                            value={penalty.note || ""}
-                            onChange={(e) =>
-                              handlePenaltyChange(
-                                vehicleDetail.id,
-                                penalty.tempId,
-                                "note",
-                                e.target.value
-                              )
-                            }
-                          />
-                        </div>
-                        <button
-                          onClick={() =>
-                            handleRemovePenalty(
-                              vehicleDetail.id,
-                              penalty.tempId
-                            )
-                          }
-                          className="ml-2 mt-5 px-2 py-1 bg-red-100 text-red-700 rounded hover:bg-red-200"
-                        >
-                          Xóa
-                        </button>
-                      </div>
-                    </div>
-                  ))}
+                    ))}
 
-                <div className="flex justify-between mt-3">
                   <button
                     onClick={() => handleAddPenalty(vehicleDetail.id)}
                     className="px-3 py-1 bg-gray-200 text-gray-700 rounded hover:bg-gray-300"
                   >
                     + Thêm lỗi
                   </button>
-                  <div className="space-x-2">
-                    <button
-                      onClick={() => cancelVehicleReturn(vehicleDetail.id)}
-                      className="px-3 py-1 bg-gray-300 text-gray-700 rounded hover:bg-gray-400"
-                    >
-                      Hủy
-                    </button>
-                    <button
-                      onClick={() => confirmVehicleReturn(vehicleDetail)}
-                      className="px-3 py-1 bg-green-500 text-white rounded hover:bg-green-600"
-                    >
-                      Xác Nhận Trả Xe
-                    </button>
-                  </div>
                 </div>
-              </div>
-            )}
+              )}
           </div>
         ))
       ) : (
@@ -598,24 +619,13 @@ export const ContractDetailPage = () => {
         </p>
       )}
 
-      <div className="mt-6 flex justify-between">
+      <div className="mt-6">
         <button
           onClick={() => navigate(-1)}
           className="px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400"
         >
           Quay lại
         </button>
-        {vehiclesInContract.some(
-          (v) => v.status === "ACTIVE" && !v.isReturning
-        ) && (
-          <button
-            onClick={goToSummaryPage}
-            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-            disabled={returningVehicle !== null}
-          >
-            Trả Tất Cả Xe & Tạo Hóa Đơn
-          </button>
-        )}
       </div>
     </div>
   );

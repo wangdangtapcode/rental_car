@@ -27,7 +27,11 @@ export const Header = () => {
           Danh sách xe
         </Link>
       </nav>
-
+      <nav className="flex space-x-6 ml-10">
+        <Link to="/booking" className="hover:text-gray-300 font-medium">
+          Đặt xe
+        </Link>
+      </nav>
       <div className="ml-auto">
         {user ? (
           <button

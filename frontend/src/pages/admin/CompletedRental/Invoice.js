@@ -9,13 +9,14 @@ export const Invoice = () => {
   const location = useLocation();
 
   const [contractDetails, setContractDetails] = useState(null);
+  const [selectedVehicles, setSelectedVehicles] = useState([]);
 
   const [calculation, setCalculation] = useState({
     totalPenalties: 0,
     totalEstimatedAmount: 0,
     totalAmount: 0,
-    depositAmount: 0,
-    finalAmountDue: 0,
+    isLastVehicles: false,
+    finalAmount: 0,
   });
   const [isLoading, setIsLoading] = useState(true);
   const [isCreatingInvoice, setIsCreatingInvoice] = useState(false);
@@ -23,47 +24,56 @@ export const Invoice = () => {
 
   const currentUser = useSelector((state) => state.user.user);
 
-  const calculateCosts = useCallback((contract) => {
-    if (!contract) return;
+  const calculateCosts = useCallback(
+    (vehicles) => {
+      if (!vehicles || !Array.isArray(vehicles)) return;
 
-    const deposit = contract.depositAmount || 0;
-    const estimatedTotal = contract.totalEstimatedAmount || 0;
+      // Tính tổng tiền thuê từ các xe được chọn
+      let totalRentalAmount = 0;
+      let totalPenalties = 0;
 
-    // 1. Tính tổng phạt ĐÃ CÓ trong hợp đồng gốc
-    let existingPenaltiesTotal = 0;
-    if (
-      contract.contractVehicleDetails &&
-      Array.isArray(contract.contractVehicleDetails)
-    ) {
-      contract.contractVehicleDetails.forEach((detail) => {
-        if (detail.penalties && Array.isArray(detail.penalties)) {
-          detail.penalties.forEach((penalty) => {
-            existingPenaltiesTotal += Number(penalty.penaltyAmount) || 0;
+      vehicles.forEach((vehicle) => {
+        totalRentalAmount += vehicle.totalEstimatedAmount;
+
+        // Tính tiền phạt
+        if (vehicle.penalties && Array.isArray(vehicle.penalties)) {
+          vehicle.penalties.forEach((penalty) => {
+            totalPenalties += Number(penalty.penaltyAmount) || 0;
           });
         }
       });
-    }
 
-    // 3. Tính tổng tất cả các khoản phạt
-    const totalPenalties = existingPenaltiesTotal;
+      // Kiểm tra xem có phải những xe cuối cùng trong hợp đồng không
+      const allVehiclesInContract =
+        contractDetails?.contractVehicleDetails || [];
+      const remainingActiveVehicles = allVehiclesInContract.filter(
+        (contractVehicle) =>
+          contractVehicle.status === "ACTIVE" &&
+          !vehicles.some(
+            (selectedVehicle) => selectedVehicle.id === contractVehicle.id
+          )
+      );
+      const isLastVehicles = remainingActiveVehicles.length === 0;
 
-    // 4. Tính tổng tiền mới = tiền thuê gốc + tổng tất cả phạt
-    const newTotalAmount = estimatedTotal + totalPenalties;
+      // Tính tổng tiền
+      const totalAmount = totalRentalAmount + totalPenalties;
 
-    // 5. Tính số tiền cuối cùng = Tổng mới - tiền cọc
-    const finalAmountDue = newTotalAmount - deposit;
+      // Nếu là những xe cuối cùng thì áp dụng tiền cọc
+      const finalAmount = isLastVehicles
+        ? totalAmount - (contractDetails?.depositAmount || 0)
+        : totalAmount;
 
-    // 6. Cập nhật state calculation
-    setCalculation({
-      totalPenalties: totalPenalties,
-      totalEstimatedAmount: estimatedTotal,
-      totalAmount: newTotalAmount,
-      depositAmount: deposit,
-      finalAmountDue,
-    });
-  }, []); // Không cần dependency
+      setCalculation({
+        totalPenalties,
+        totalEstimatedAmount: totalRentalAmount,
+        totalAmount,
+        isLastVehicles,
+        finalAmount,
+      });
+    },
+    [contractDetails]
+  );
 
-  // --- Lấy dữ liệu từ State và Tính toán ---
   useEffect(() => {
     setIsLoading(true);
     setError(null);
@@ -74,9 +84,6 @@ export const Invoice = () => {
       setIsLoading(false);
       return;
     }
-    // const penalties = contractFromState.contractVehicleDetails.flatMap(
-    //   (detail) => detail.penalties || []
-    // );
 
     if (!currentUser || !currentUser.id) {
       setError(
@@ -85,46 +92,45 @@ export const Invoice = () => {
       setIsLoading(false);
       return;
     }
-
-    console.log("Contract received from state:", contractFromState);
-
-    setContractDetails(contractFromState);
-
-    calculateCosts(contractFromState);
-
+    console.log("contractFromState", contractFromState);
+    setContractDetails(contractFromState.contract);
+    setSelectedVehicles(contractFromState.selectedVehicles);
+    calculateCosts(contractFromState.selectedVehicles);
     setIsLoading(false);
   }, [location.state, calculateCosts, currentUser]);
 
-  // --- Hàm Tạo Hóa đơn (Sử dụng totalPenalties tổng hợp) ---
   const handleCreateInvoice = useCallback(async () => {
-    if (!contractDetails || !currentUser || !currentUser.id) {
+    if (
+      !contractDetails ||
+      !selectedVehicles ||
+      !currentUser ||
+      !currentUser.id
+    ) {
       setError("Thiếu thông tin Hợp đồng hoặc Nhân viên.");
       return;
     }
 
     setIsCreatingInvoice(true);
     setError(null);
-
-    const paymentDate = new Date().toISOString().slice(0, 10);
-
-    const invoicePayload = {
-      paymentDate: paymentDate,
-      penaltyAmount: calculation.totalPenalties,
-      dueAmount: calculation.finalAmountDue,
-      totalAmount: calculation.totalAmount,
-      rentalContract: contractDetails,
-      employee: currentUser,
-    };
-
-    console.log("Payload gửi đi để tạo InvoiceDetail:", invoicePayload);
-
+    const now = new Date();
+    const formattedCreatedDate = now.toISOString().slice(0, 10);
     try {
+      // Chuẩn bị dữ liệu gửi lên server
+      const invoiceData = {
+        employee: currentUser,
+        paymentDate: formattedCreatedDate,
+        contractVehicleDetails: selectedVehicles,
+        penaltyAmount: calculation.totalPenalties,
+        totalAmount: calculation.totalAmount,
+        dueAmount: calculation.finalAmount,
+      };
+      console.log("invoiceData", invoiceData);
       const response = await axios.post(
-        "http://localhost:8081/api/invoice/create",
-        invoicePayload
+        `http://localhost:8081/api/invoice/create`,
+        invoiceData
       );
-      console.log(response.data);
-      if (response.data === true) {
+
+      if (response.data === "Tạo hóa đơn thành công") {
         alert("Thêm hoá đơn thành công!");
         navigate("/completedRental");
       } else {
@@ -147,7 +153,7 @@ export const Invoice = () => {
     } finally {
       setIsCreatingInvoice(false);
     }
-  }, [contractDetails, calculation, currentUser]);
+  }, [contractDetails, selectedVehicles, currentUser, navigate, calculation]);
 
   if (isLoading)
     return (
@@ -163,15 +169,6 @@ export const Invoice = () => {
         Không có thông tin hợp đồng để tạo hóa đơn.
       </p>
     );
-
-  // Lấy các giá trị tính toán mới để render
-  const {
-    totalPenalties,
-    totalEstimatedAmount,
-    totalAmount,
-    depositAmount,
-    finalAmountDue,
-  } = calculation;
 
   const formatDate = (dateString) => {
     if (!dateString) return "N/A";
@@ -193,7 +190,7 @@ export const Invoice = () => {
   return (
     <div className="container mx-auto p-4 max-w-3xl">
       <h2 className="text-2xl font-semibold mb-6 text-center">
-        Hóa đơn Thanh toán Hợp đồng
+        Hóa đơn Thanh toán {selectedVehicles.length > 1 ? "Nhiều Xe" : "Một Xe"}
       </h2>
       {error && (
         <p className="mb-4 text-center text-red-600 font-medium">
@@ -230,14 +227,6 @@ export const Invoice = () => {
               <strong>NV tạo HĐ:</strong>{" "}
               {contractDetails.employee?.user?.fullName || "N/A"}
             </p>
-            <p>
-              <strong>Ngày bắt đầu HĐ:</strong>{" "}
-              {formatDate(contractDetails.startDate)}
-            </p>
-            <p>
-              <strong>Ngày kết thúc HĐ:</strong>{" "}
-              {formatDate(contractDetails.endDate)}
-            </p>
             <p className="mt-2">
               <strong>NV tạo hóa đơn:</strong>{" "}
               {currentUser?.user.fullName || "N/A"}
@@ -249,41 +238,110 @@ export const Invoice = () => {
           </div>
         </div>
 
-        {/* --- Phần Chi tiết Xe (Hiển thị từ contractDetails) --- */}
+        {/* --- Phần Chi tiết Xe (Hiển thị từ selectedVehicles) --- */}
         <div className="mb-5">
           <h3 className="text-base font-semibold mb-2 text-gray-700">
             Chi tiết Xe trong Hợp đồng
           </h3>
-          {contractDetails.contractVehicleDetails &&
-          contractDetails.contractVehicleDetails.length > 0 ? (
-            <table className="w-full text-left border-collapse">
-              <thead>
-                <tr className="border-b bg-gray-50">
-                  <th className="py-2 px-2 font-medium text-gray-600">
-                    Tên xe
-                  </th>
-                  <th className="py-2 px-2 font-medium text-gray-600">
-                    Biển số
-                  </th>
-                  <th className="py-2 px-2 font-medium text-gray-600 text-right">
-                    Giá thuê (HĐ)
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {contractDetails.contractVehicleDetails.map((vd) => (
-                  <tr key={vd.id} className="border-b border-gray-100">
-                    <td className="py-1.5 px-2">{vd.vehicle?.name || "N/A"}</td>
-                    <td className="py-1.5 px-2 font-mono">
-                      {vd.vehicle?.licensePlate || "N/A"}
-                    </td>
-                    <td className="py-1.5 px-2 text-right">
-                      {formatCurrency(vd.rentalPrice)}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+          {selectedVehicles && selectedVehicles.length > 0 ? (
+            <div className="space-y-4">
+              {selectedVehicles.map((vd) => (
+                <div
+                  key={vd.id}
+                  className="border border-gray-200 rounded-lg p-4"
+                >
+                  <div className="grid grid-cols-3 gap-4">
+                    <div className="col-span-1">
+                      {vd.vehicle?.vehicleImages &&
+                      vd.vehicle.vehicleImages.length > 0 ? (
+                        <div className="relative h-48 rounded-lg overflow-hidden">
+                          <img
+                            src={vd.vehicle.vehicleImages[0].imageUri}
+                            alt={vd.vehicle.name}
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                      ) : (
+                        <div className="h-48 bg-gray-100 rounded-lg flex items-center justify-center">
+                          <span className="text-gray-400">Không có ảnh</span>
+                        </div>
+                      )}
+                    </div>
+                    <div className="col-span-2">
+                      <div className="grid grid-cols-2 gap-4 text-sm">
+                        <div>
+                          <span className="font-medium">Tên xe:</span>{" "}
+                          {vd.vehicle?.name || "N/A"}
+                        </div>
+                        <div>
+                          <span className="font-medium">Biển số:</span>{" "}
+                          {vd.vehicle?.licensePlate || "N/A"}
+                        </div>
+                        <div>
+                          <span className="font-medium">Ngày bắt đầu:</span>{" "}
+                          {formatDate(vd.startDate)}
+                        </div>
+                        <div>
+                          <span className="font-medium">Ngày kết thúc:</span>{" "}
+                          {formatDate(vd.endDate)}
+                        </div>
+                        <div>
+                          <span className="font-medium">Ngày trả:</span>{" "}
+                          {formatDate(vd.actualReturnDate)}
+                        </div>
+                        <div>
+                          <span className="font-medium">Giá thuê/ngày:</span>{" "}
+                          {formatCurrency(vd.rentalPrice)}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {vd.penalties && vd.penalties.length > 0 && (
+                    <div className="my-4 p-4 border border-orange-200 rounded-lg bg-orange-50">
+                      <table className="w-full text-sm">
+                        <thead>
+                          <tr className="border-b border-orange-200">
+                            <th className="py-2 px-2 text-left">Loại phạt</th>
+                            <th className="py-2 px-2 text-left">Ghi chú</th>
+                            <th className="py-2 px-2 text-right">Số tiền</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {vd.penalties.map((penalty, index) => (
+                            <tr
+                              key={index}
+                              className="border-b border-orange-100"
+                            >
+                              <td className="py-2 px-2">
+                                {penalty.penaltyType?.name}
+                              </td>
+                              <td className="py-2 px-2">{penalty.note}</td>
+                              <td className="py-2 px-2 text-right font-medium">
+                                {formatCurrency(penalty.penaltyAmount)}
+                              </td>
+                            </tr>
+                          ))}
+                          <tr className="bg-orange-100">
+                            <td colSpan="2" className="py-2 px-2 font-medium">
+                              Tổng phạt xe này:
+                            </td>
+                            <td className="py-2 px-2 text-right font-bold">
+                              {formatCurrency(
+                                vd.penalties.reduce(
+                                  (sum, p) => sum + (p.penaltyAmount || 0),
+                                  0
+                                )
+                              )}
+                            </td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
           ) : (
             <p className="text-center text-gray-500 italic">
               Không có chi tiết xe trong hợp đồng này.
@@ -292,60 +350,56 @@ export const Invoice = () => {
         </div>
 
         {/* --- Phần Phạt ĐÃ CÓ trong Hợp đồng --- */}
-        {calculation.totalPenalties > 0 && (
-          <div className="mb-5 pb-4 border-b border-gray-200">
-            <h3 className="text-base font-semibold mb-2 text-orange-700">
-              Chi tiết Phạt
-            </h3>
-            <table className="w-full text-left border-collapse">
-              <thead>
-                <tr className="border-b bg-orange-50">
-                  <th className="py-2 px-2 font-medium text-orange-800">
-                    Loại phạt
-                  </th>
-                  <th className="py-2 px-2 font-medium text-orange-800">
-                    Xe liên quan
-                  </th>
-                  <th className="py-2 px-2 font-medium text-orange-800">
-                    Ghi chú
-                  </th>
-                  <th className="py-2 px-2 font-medium text-orange-800 text-right">
-                    Số tiền
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {contractDetails.contractVehicleDetails
-                  ?.flatMap(
-                    (detail) =>
-                      detail.penalties?.map((p) => ({
-                        ...p,
-                        vehicleName: detail.vehicle?.name,
-                      })) || [] // Thêm tên xe để dễ nhìn
-                  )
-                  .map((p, index) => (
-                    <tr
-                      key={`existing-${p.id || index}`}
-                      className="border-b border-gray-100"
-                    >
-                      <td className="py-1.5 px-2">
-                        {p.penaltyType?.name || "N/A"}
+        {/* {selectedVehicles.map(
+          (vehicleDetail) =>
+            vd.penalties &&
+            vd.penalties.length > 0 && (
+              <div
+                key={vehicleDetail.id}
+                className="mb-4 p-4 border border-orange-200 rounded-lg bg-orange-50"
+              >
+                <h4 className="font-medium text-orange-800 mb-2">
+                  Phạt xe {vehicleDetail.vehicle?.name} -{" "}
+                  {vehicleDetail.vehicle?.licensePlate}
+                </h4>
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b border-orange-200">
+                      <th className="py-2 px-2 text-left">Loại phạt</th>
+                      <th className="py-2 px-2 text-left">Ghi chú</th>
+                      <th className="py-2 px-2 text-right">Số tiền</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {vehicleDetail.penalties.map((penalty, index) => (
+                      <tr key={index} className="border-b border-orange-100">
+                        <td className="py-2 px-2">
+                          {penalty.penaltyType?.name}
+                        </td>
+                        <td className="py-2 px-2">{penalty.note}</td>
+                        <td className="py-2 px-2 text-right font-medium">
+                          {formatCurrency(penalty.penaltyAmount)}
+                        </td>
+                      </tr>
+                    ))}
+                    <tr className="bg-orange-100">
+                      <td colSpan="2" className="py-2 px-2 font-medium">
+                        Tổng phạt xe này:
                       </td>
-                      <td className="py-1.5 px-2 text-xs">
-                        {p.vehicleName || "N/A"}
-                      </td>
-                      <td className="py-1.5 px-2 italic text-gray-600">
-                        {p.note || "(không có)"}
-                      </td>
-                      <td className="py-1.5 px-2 text-right font-semibold text-orange-600">
-                        {formatCurrency(p.penaltyAmount)}
+                      <td className="py-2 px-2 text-right font-bold">
+                        {formatCurrency(
+                          vehicleDetail.penalties.reduce(
+                            (sum, p) => sum + (p.penaltyAmount || 0),
+                            0
+                          )
+                        )}
                       </td>
                     </tr>
-                  ))}
-              </tbody>
-            </table>
-          </div>
-        )}
+                  </tbody>
+                </table>
+              </div>
+            )
+        )} */}
 
         {calculation.totalPenalties === 0 && (
           <div className="mb-5 pb-4 border-b border-gray-200">
@@ -364,14 +418,14 @@ export const Invoice = () => {
             <p className="flex justify-between items-center text-base">
               <span className="text-gray-600">Tổng tiền thuê gốc (HĐ):</span>
               <span className="font-medium text-gray-800 w-36 text-right">
-                {formatCurrency(totalEstimatedAmount)}
+                {formatCurrency(calculation.totalEstimatedAmount)}
               </span>
             </p>
-            {totalPenalties > 0 && (
+            {calculation.totalPenalties > 0 && (
               <p className="flex justify-between items-center text-base">
                 <span className="text-gray-600">Tổng phạt:</span>
                 <span className="font-medium text-orange-700 w-36 text-right">
-                  (+) {formatCurrency(totalPenalties)}
+                  (+) {formatCurrency(calculation.totalPenalties)}
                 </span>
               </p>
             )}
@@ -380,37 +434,41 @@ export const Invoice = () => {
             <p className="flex justify-between items-center text-base font-semibold border-t pt-2">
               <span className="text-gray-800">Tổng cộng (Thuê + Phạt):</span>
               <span className="text-gray-900 w-36 text-right">
-                {formatCurrency(totalAmount)}
+                {formatCurrency(calculation.totalAmount)}
               </span>
             </p>
-            <p className="flex justify-between items-center text-base">
-              <span className="text-gray-600">Tiền cọc đã trả:</span>
-              <span className="font-medium text-green-700 w-36 text-right">
-                (-) {formatCurrency(depositAmount)}
-              </span>
-            </p>
-            {/* Số tiền cuối cùng */}
-            <div
-              className={`mt-3 font-bold text-lg text-right p-3 rounded-md border `}
-            >
-              {finalAmountDue > 0 && (
-                <span>
-                  Thanh toán thêm:{" "}
-                  <strong className="ml-2">
-                    {formatCurrency(finalAmountDue)}
-                  </strong>
-                </span>
-              )}
-              {finalAmountDue < 0 && (
-                <span>
-                  Hoàn lại KH:{" "}
-                  <strong className="ml-2">
-                    {formatCurrency(Math.abs(finalAmountDue))}
-                  </strong>
-                </span>
-              )}
-              {finalAmountDue === 0 && <span>Hoàn tất.</span>}
-            </div>
+
+            {/* Hiển thị tiền cọc nếu là những xe cuối cùng */}
+            {calculation.isLastVehicles && (
+              <>
+                <p className="flex justify-between items-center text-base">
+                  <span className="text-gray-600">Tiền cọc đã trả:</span>
+                  <span className="font-medium text-green-700 w-36 text-right">
+                    (-) {formatCurrency(contractDetails?.depositAmount || 0)}
+                  </span>
+                </p>
+                {/* Số tiền cuối cùng */}
+                <div className="mt-3 font-bold text-lg text-right p-3 rounded-md border">
+                  {calculation.finalAmount > 0 && (
+                    <span>
+                      Thanh toán thêm:{" "}
+                      <strong className="ml-2">
+                        {formatCurrency(calculation.finalAmount)}
+                      </strong>
+                    </span>
+                  )}
+                  {calculation.finalAmount < 0 && (
+                    <span>
+                      Hoàn lại KH:{" "}
+                      <strong className="ml-2">
+                        {formatCurrency(Math.abs(calculation.finalAmount))}
+                      </strong>
+                    </span>
+                  )}
+                  {calculation.finalAmount === 0 && <span>Hoàn tất.</span>}
+                </div>
+              </>
+            )}
           </div>
         </div>
       </div>{" "}

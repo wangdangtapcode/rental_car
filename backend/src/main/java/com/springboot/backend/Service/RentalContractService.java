@@ -19,13 +19,4 @@ public interface RentalContractService {
 
     List<RentalContract> getContractActiveByFullNameCustomer(String name);
 
-    // Thêm phương thức mới để trả xe riêng lẻ
-    boolean returnVehicle(Long contractVehicleDetailId, Long employeeId, LocalDate returnDate,
-            List<Map<String, Object>> penalties);
-
-    // Phương thức lấy thông tin chi tiết xe đang thuê
-    ContractVehicleDetail getContractVehicleDetail(Long id);
-
-    // Phương thức lấy danh sách xe đang thuê của một hợp đồng
-    List<ContractVehicleDetail> getActiveVehiclesForContract(Long contractId);
 }

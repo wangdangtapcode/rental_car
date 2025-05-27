@@ -81,7 +81,6 @@ export const VehicleManagement = () => {
                 <th className=" px-4 py-2">Biển số xe</th>
                 <th className=" px-4 py-2">Giá thuê (Ngày)</th>
                 <th className=" px-4 py-2">Chủ sở hữu</th>
-                <th className=" px-4 py-2">Trạng thái</th>
                 <th className=" px-4 py-2">Hành động</th>
               </tr>
             </thead>
@@ -89,7 +88,9 @@ export const VehicleManagement = () => {
               {vehicleList.map((vehicle) => (
                 <tr
                   onClick={() =>
-                    navigate(`/admin/management/vehicle/detail/${vehicle.id}`)
+                    navigate(`/admin/management/vehicle/detail/${vehicle.id}`, {
+                      state: { vehicle },
+                    })
                   }
                   className="hover:bg-gray-100 text-center divide-x divide-gray-300 cursor-pointer"
                 >
@@ -127,18 +128,6 @@ export const VehicleManagement = () => {
                   <td className="px-4 py-2">{vehicle.licensePlate}</td>
                   <td className="px-4 py-2">{vehicle.rentalPrice}</td>
                   <td className="px-4 py-2">{vehicle.ownerType}</td>
-
-                  <td className="px-4 py-2">
-                    <span
-                      className={`px-3 py-1 rounded-full text-sm font-semibold ${
-                        vehicle.status === "ACTIVE"
-                          ? "bg-green-100 text-green-700"
-                          : "bg-red-100 text-red-700"
-                      }`}
-                    >
-                      {vehicle.status}
-                    </span>
-                  </td>
                   <td className="px-4 py-2 flex items-center justify-center space-x-2">
                     <FaRegEdit
                       className=" text-yellow-500 cursor-pointer text-2xl"

@@ -28,14 +28,11 @@ public class ContractVehicleDetail {
     @Column(name = "end_date")
     private LocalDate endDate;
 
+    @Column(name = "condition_notes")
+    private String conditionNotes;
+
     @Column(name = "total_estimated_amount")
     private Float totalEstimatedAmount;
-
-    @Column(name = "deposit_amount")
-    private Float depositAmount;
-
-    @Column(name = "due_amount")
-    private Float dueAmount;
 
     @Column(name = "status")
     private String status;
@@ -51,6 +48,7 @@ public class ContractVehicleDetail {
     private List<Penalty> penalties;
 
     @ManyToOne()
+    @JsonIgnore
     @JoinColumn(name = "invoice_detail_id")
     private InvoiceDetail invoiceDetail;
 

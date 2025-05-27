@@ -13,7 +13,7 @@ export const Home = () => {
       try {
         const count = 4;
         const response = await axios.get(
-          `http://localhost:8081/api/vehicle/random/${count}`
+          `http://localhost:8081/api/vehicle/currently-available`
         );
         console.log(response.data);
         setVehicles(response.data);

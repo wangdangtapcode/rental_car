@@ -18,50 +18,19 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class InvoiceDetailController {
     @Autowired
-    private final  InvoiceDetailService invoiceDetailService;
+    private final InvoiceDetailService invoiceDetailService;
 
-//    @PostMapping(value = "/api/invoice/create")
-//    public boolean createInvoiceDetail(@RequestBody InvoiceDetail invoicePayload) {
-//        return invoiceDetailService.createInvoiceDetail(invoicePayload);
-//    }
-    
-    // Endpoint mới để tạo hóa đơn cho xe riêng lẻ
-    @PostMapping(value = "/api/invoice/createSingle/{contractVehicleDetailId}")
-    public ResponseEntity<String> createSingleVehicleInvoice(
-            @PathVariable("contractVehicleDetailId") Long contractVehicleDetailId,
-            @RequestParam("employeeId") Long employeeId,
-            @RequestBody Map<String, Object> invoiceData) {
-        
-        boolean success = invoiceDetailService.createSingleVehicleInvoice(
-                contractVehicleDetailId, employeeId, invoiceData);
-        
+    // Endpoint để tạo hóa đơn cho một hoặc nhiều xe
+    @PostMapping(value = "/api/invoice/create")
+    public ResponseEntity<String> createInvoice(@RequestBody InvoiceDetail invoiceData) {
+
+        boolean success = invoiceDetailService.createInvoice(invoiceData);
+
         if (success) {
             return ResponseEntity.ok("Tạo hóa đơn thành công");
         } else {
             return ResponseEntity.badRequest().body("Tạo hóa đơn thất bại");
         }
     }
-    
-    // Lấy danh sách hóa đơn theo ID khách hàng
-    @GetMapping(value = "/api/invoice/customer/{customerId}")
-    public ResponseEntity<List<InvoiceDetail>> getInvoicesByCustomerId(
-            @PathVariable("customerId") Long customerId) {
-        
-        List<InvoiceDetail> invoices = invoiceDetailService.getInvoicesByCustomerId(customerId);
-        return ResponseEntity.ok(invoices);
-    }
-    
-    // Lấy hóa đơn theo ID chi tiết xe thuê
-    @GetMapping(value = "/api/invoice/vehicleDetail/{contractVehicleDetailId}")
-    public ResponseEntity<InvoiceDetail> getInvoiceByContractVehicleDetailId(
-            @PathVariable("contractVehicleDetailId") Long contractVehicleDetailId) {
-        
-        InvoiceDetail invoice = invoiceDetailService.getInvoiceByContractVehicleDetailId(contractVehicleDetailId);
-        
-        if (invoice != null) {
-            return ResponseEntity.ok(invoice);
-        } else {
-            return ResponseEntity.notFound().build();
-        }
-    }
+
 }

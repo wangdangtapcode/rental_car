@@ -59,12 +59,12 @@ VALUES
 (7, 'Toyota Vios', '51B-45678', 'Toyota', 'Sedan', 5, 2018, 'Toyota Vios là mẫu sedan được ưa chuộng nhiều năm liền nhờ độ bền cao và chi phí sử dụng thấp. Xe có thiết kế đơn giản nhưng hiệu quả, vận hành nhẹ nhàng trong đô thị. Nội thất tiện nghi cơ bản, phù hợp với nhu cầu di chuyển hàng ngày. Vios là lựa chọn hàng đầu cho người cần thuê xe giá rẻ và ổn định.', 550000.0, 'GOOD', 'STORE', 'RENTED', null),
 (8, 'VinFast Lux A2.0', '51A-90123', 'VinFast', 'Sedan', 5, 2020, 'VinFast Lux A2.0 mang lại trải nghiệm lái cao cấp nhờ khung gầm được phát triển từ BMW. Xe có nội thất rộng rãi, hệ thống giải trí cảm ứng, điều hòa tự động 2 vùng. Động cơ mạnh mẽ giúp xe tăng tốc nhanh, cảm giác lái đầm chắc. Đây là mẫu xe sedan cao cấp phù hợp với khách hàng doanh nhân hoặc người muốn trải nghiệm thương hiệu Việt.', 850000.0, 'GOOD', 'STORE', 'ACTIVE', null),
 (9, 'Mitsubishi Xpander', '51K-56789', 'Mitsubishi', 'MPV', 7, 2021, 'Mitsubishi Xpander được biết đến với khả năng chở 7 người thoải mái, thiết kế hiện đại và tiết kiệm nhiên liệu. Xe có khoang hành lý rộng, phù hợp cho gia đình hoặc nhóm du lịch. Nội thất bền bỉ, vận hành ổn định, giá thuê hợp lý. Đây là mẫu MPV phổ thông rất được ưa chuộng tại Việt Nam.', 750000.0, 'GOOD', 'STORE', 'ACTIVE', null),
-(10, 'Suzuki Ertiga', '51M-01234', 'Suzuki', 'MPV', 7, 2020, 'Suzuki Ertiga là mẫu xe 7 chỗ với giá thành hợp lý, thích hợp cho khách hàng thuê đi tỉnh hoặc đi du lịch cuối tuần. Xe có động cơ tiết kiệm, nội thất bố trí hợp lý, điều hòa 2 vùng cho hàng ghế sau. Ertiga nhẹ nhàng, dễ lái, phù hợp với nhu cầu sử dụng đơn giản.', 700000.0, 'GOOD', 'PARTNER', 'ACTIVE', 1),
-(11, 'Hyundai Tucson', '52A-67890', 'Hyundai', 'SUV', 5, 2022, 'Hyundai Tucson mang dáng vẻ hiện đại, đậm chất châu Âu. Xe có không gian rộng rãi, trang bị hệ thống an toàn chủ động như cảnh báo điểm mù, hỗ trợ đỗ xe và cruise control thông minh. Động cơ mạnh mẽ, vận hành mượt mà. Tucson thích hợp cho những khách hàng yêu thích trải nghiệm cao cấp và an toàn.', 970000.0, 'EXCELLENT', 'PARTNER', 'ACTIVE', 2),
-(12, 'Kia Carnival', '52B-12345', 'Kia', 'MPV', 7, 2023, 'Kia Carnival là mẫu xe gia đình cao cấp với thiết kế đậm chất sang trọng. Khoang nội thất cực kỳ rộng rãi, đầy đủ tiện nghi như ghế chỉnh điện, màn hình giải trí cho hàng ghế sau và điều hòa đa vùng. Xe phù hợp cho các chuyến du lịch dài hoặc đưa đón khách VIP.', 1100000.0, 'EXCELLENT', 'PARTNER', 'ACTIVE', 3),
-(13, 'Toyota Fortuner', '52C-23456', 'Toyota', 'SUV', 7, 2021, 'Toyota Fortuner là mẫu SUV 7 chỗ mạnh mẽ, gầm cao, khả năng vận hành đa địa hình vượt trội. Nội thất tiện nghi, có nhiều tính năng hỗ trợ lái và an toàn. Xe thích hợp cho cả mục đích gia đình và công việc cần di chuyển đường dài hoặc khu vực đồi núi.', 1150000.0, 'GOOD', 'PARTNER', 'ACTIVE', 4),
-(14, 'Honda City', '52D-34567', 'Honda', 'Sedan', 5, 2019, 'Honda City là lựa chọn lý tưởng cho khách hàng trẻ năng động. Với thiết kế thể thao, động cơ tiết kiệm và khả năng xử lý linh hoạt, City đáp ứng tốt nhu cầu di chuyển trong đô thị. Nội thất đơn giản nhưng tiện nghi, dễ sử dụng.', 580000.0, 'GOOD', 'PARTNER', 'INACTIVE', 5),
-(15, 'Mazda 3', '52E-45678', 'Mazda', 'Sedan', 5, 2020, 'Mazda 3 mang đậm phong cách thiết kế KODO sắc sảo, nội thất hiện đại như một chiếc xe sang. Hệ thống cách âm tốt, cảm giác lái mượt mà và tiết kiệm nhiên liệu. Đây là mẫu xe rất được ưa chuộng trong phân khúc sedan hạng C.', 750000.0, 'GOOD', 'PARTNER', 'INACTIVE', 6);
+(10, 'Suzuki Ertiga', '51M-01234', 'Suzuki', 'MPV', 7, 2020, 'Suzuki Ertiga là mẫu xe 7 chỗ với giá thành hợp lý, thích hợp cho khách hàng thuê đi tỉnh hoặc đi du lịch cuối tuần. Xe có động cơ tiết kiệm, nội thất bố trí hợp lý, điều hòa 2 vùng cho hàng ghế sau. Ertiga nhẹ nhàng, dễ lái, phù hợp với nhu cầu sử dụng đơn giản.', 700000.0, 'GOOD', 'PARTNER', 'ACTIVE', null),
+(11, 'Hyundai Tucson', '52A-67890', 'Hyundai', 'SUV', 5, 2022, 'Hyundai Tucson mang dáng vẻ hiện đại, đậm chất châu Âu. Xe có không gian rộng rãi, trang bị hệ thống an toàn chủ động như cảnh báo điểm mù, hỗ trợ đỗ xe và cruise control thông minh. Động cơ mạnh mẽ, vận hành mượt mà. Tucson thích hợp cho những khách hàng yêu thích trải nghiệm cao cấp và an toàn.', 970000.0, 'EXCELLENT', 'PARTNER', 'ACTIVE', null),
+(12, 'Kia Carnival', '52B-12345', 'Kia', 'MPV', 7, 2023, 'Kia Carnival là mẫu xe gia đình cao cấp với thiết kế đậm chất sang trọng. Khoang nội thất cực kỳ rộng rãi, đầy đủ tiện nghi như ghế chỉnh điện, màn hình giải trí cho hàng ghế sau và điều hòa đa vùng. Xe phù hợp cho các chuyến du lịch dài hoặc đưa đón khách VIP.', 1100000.0, 'EXCELLENT', 'PARTNER', 'ACTIVE', null),
+(13, 'Toyota Fortuner', '52C-23456', 'Toyota', 'SUV', 7, 2021, 'Toyota Fortuner là mẫu SUV 7 chỗ mạnh mẽ, gầm cao, khả năng vận hành đa địa hình vượt trội. Nội thất tiện nghi, có nhiều tính năng hỗ trợ lái và an toàn. Xe thích hợp cho cả mục đích gia đình và công việc cần di chuyển đường dài hoặc khu vực đồi núi.', 1150000.0, 'GOOD', 'PARTNER', 'ACTIVE', null),
+(14, 'Honda City', '52D-34567', 'Honda', 'Sedan', 5, 2019, 'Honda City là lựa chọn lý tưởng cho khách hàng trẻ năng động. Với thiết kế thể thao, động cơ tiết kiệm và khả năng xử lý linh hoạt, City đáp ứng tốt nhu cầu di chuyển trong đô thị. Nội thất đơn giản nhưng tiện nghi, dễ sử dụng.', 580000.0, 'GOOD', 'PARTNER', 'INACTIVE', null),
+(15, 'Mazda 3', '52E-45678', 'Mazda', 'Sedan', 5, 2020, 'Mazda 3 mang đậm phong cách thiết kế KODO sắc sảo, nội thất hiện đại như một chiếc xe sang. Hệ thống cách âm tốt, cảm giác lái mượt mà và tiết kiệm nhiên liệu. Đây là mẫu xe rất được ưa chuộng trong phân khúc sedan hạng C.', 750000.0, 'GOOD', 'PARTNER', 'INACTIVE', null);
 
 -- Insert into payment_partners
 -- INSERT INTO payment_partners (id, period, total_rental_days, start_period, end_period, total_amout, status, created_date)
@@ -129,11 +129,11 @@ VALUES
 (8, 'Lái xe ngoài khu vực cho phép', 600000.0, 'Phạt do đưa xe ra ngoài khu vực đã cam kết'),
 (9, 'Chở quá số người quy định', 400000.0, 'Phạt do chở quá số lượng hành khách cho phép theo thiết kế xe');
 -- Insert into penalties
-INSERT INTO penalties (id, penalty_amount, note, contract_vehicle_detail_id, penalty_type_id)
-VALUES
-(1, 500000.0, 'Chạy quá tốc độ', 1, 1),
-(2, 1000000.0, 'Vỡ gương chiếu hậu', 2, 2),
-(3, 200000.0, 'Trả xe muộn 1 ngày', 3, 3);
+-- INSERT INTO penalties (id, penalty_amount, note, contract_vehicle_detail_id, penalty_type_id)
+-- VALUES
+-- (1, 500000.0, 'Chạy quá tốc độ', 1, 1),
+-- (2, 1000000.0, 'Vỡ gương chiếu hậu', 2, 2),
+-- (3, 200000.0, 'Trả xe muộn 1 ngày', 3, 3);
 
 -- Insert into collaterals
 INSERT INTO collaterals (id, description, rental_contract_id)
@@ -144,12 +144,11 @@ VALUES
 (4, 'Hộ khẩu bản sao',4),
 (5, 'CMND bản sao', 4),
 (6, 'CMND bản sao', 5),
-(7, 'Hộ khẩu bản sao',5)
-;
+(7, 'Hộ khẩu bản sao',5);
 
 -- Insert into invoice_details
-INSERT INTO invoice_details (id, payment_date, penalty_amount, due_amount, total_amount, employee_id, contract_vehicle_detail_id)
-VALUES
-(1, '2025-05-12', 500000.0, 1920000.0, 2420000.0, 10, 1),
-(2, '2025-05-12', 1000000.0, 2400000.0, 3400000.0, 10, 2),
-(3, '2025-05-12', 200000.0, 1440000.0, 1640000.0, 10, 3);
+-- INSERT INTO invoice_details (id, payment_date, penalty_amount, due_amount, total_amount, employee_id, contract_vehicle_detail_id)
+-- VALUES
+-- (1, '2025-05-12', 500000.0, 1920000.0, 2420000.0, 10, 1),
+-- (2, '2025-05-12', 1000000.0, 2400000.0, 3400000.0, 10, 2),
+-- (3, '2025-05-12', 200000.0, 1440000.0, 1640000.0, 10, 3);

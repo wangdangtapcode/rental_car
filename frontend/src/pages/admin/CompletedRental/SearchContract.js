@@ -21,9 +21,10 @@ export const SearchContractPage = () => {
 
     try {
       const response = await axios.get(
-        `http://localhost:8081/api/completedRental?name=${searchTerm}`
+        `http://localhost:8081/api/rentalContract/completedRental/search?name=${searchTerm}`
       );
       const relevantContracts = response.data || [];
+      console.log(relevantContracts);
       setSearchResults(relevantContracts);
 
       if (relevantContracts.length === 0) {
@@ -100,9 +101,9 @@ export const SearchContractPage = () => {
                       <strong>Khách hàng:</strong>{" "}
                       {contract.customer?.user?.fullName || "N/A"}
                     </div>
-                    <div className="mb-1 text-sm text-gray-600">
-                      <strong>Từ:</strong> {contract.startDate}{" "}
-                      <strong>Đến:</strong> {contract.endDate}
+                    <div className="mb-1">
+                      <strong>Số điện thoại:</strong>{" "}
+                      {contract.customer?.user?.phoneNumber || "N/A"}
                     </div>
                   </div>
                   {/* Cột trạng thái, xe, nút */}
@@ -142,7 +143,7 @@ export const SearchContractPage = () => {
                                   Chờ thanh toán
                                 </span>
                               )}
-                              {detail.status === "RETURNED" && (
+                              {detail.status === "COMPLETED" && (
                                 <span className="px-2 py-0.5 bg-green-100 text-green-800 text-xs rounded">
                                   Đã trả
                                 </span>

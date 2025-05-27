@@ -19,33 +19,35 @@ public class VehicleController {
     @Autowired
     private VehicleService vehicleService;
 
-    @GetMapping(value = "/api/vehicle/random/{count}")
-    public List<Vehicle> findToViewHome(@PathVariable int count) {
-        return vehicleService.findToViewHome(count);
-    }
-    @GetMapping(value = "/api/vehicle/all")
-    public List<Vehicle> findToViewHomeAll() {
-        return vehicleService.findVehicleActiveAll();
-    }
-    @GetMapping(value = "/api/vehicle/view/{id}")
-    public Vehicle findVehicleToView(@PathVariable Long id) {
-        return vehicleService.findVehicleToView(id);
-    }
+    // @GetMapping(value = "/api/vehicle/random/{count}")
+    // public List<Vehicle> findToViewHome(@PathVariable int count) {
+    // return vehicleService.findToViewHome(count);
+    // }
+    // @GetMapping(value = "/api/vehicle/view/{id}")
+    // public Vehicle findVehicleToView(@PathVariable Long id) {
+    // return vehicleService.findVehicleToView(id);
+    // }
+
+//    @GetMapping(value = "/api/vehicle/all")
+//    public List<Vehicle> findToViewHomeAll() {
+//        return vehicleService.findVehicleActiveAll();
+//    }
+
     @GetMapping(value = "/api/management/vehicle/search")
-    public List<Vehicle> findByName(@RequestParam String name){
+    public List<Vehicle> findByName(@RequestParam String name) {
         return vehicleService.findByName(name);
     }
 
     @GetMapping(value = "/api/management/vehicle/search/all")
-    public List<Vehicle> findAll(){
+    public List<Vehicle> findAll() {
         return vehicleService.findAll();
     }
 
-    @PostMapping(value = "/api/management/vehicle/add",consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping(value = "/api/management/vehicle/add", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public boolean createVehicle(
             @RequestParam("vehicle") String vehicleJson,
-            @RequestParam(value = "vehicleImages", required = false) List<MultipartFile> imageFiles
-    )throws IOException {
+            @RequestParam(value = "vehicleImages", required = false) List<MultipartFile> imageFiles)
+            throws IOException {
         ObjectMapper objectMapper = new ObjectMapper();
         Vehicle vehicle = objectMapper.readValue(vehicleJson, Vehicle.class);
 
@@ -62,16 +64,13 @@ public class VehicleController {
 
         return vehicleService.createVehicle(vehicle);
     }
-    @GetMapping(value = "/api/management/vehicle/edit/{id}")
-    public Vehicle getVehicleToEdit(@PathVariable("id") Long id){
-        return vehicleService.getVehicleToEdit(id);
-    }
-    @PostMapping(value = "/api/management/vehicle/edit/{id}",consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+
+    @PostMapping(value = "/api/management/vehicle/edit/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public boolean editVehicle(
             @PathVariable("id") Long id,
             @RequestParam("vehicle") String vehicleJson,
-            @RequestParam(value = "vehicleImages", required = false) List<MultipartFile> imageFiles
-    )throws IOException {
+            @RequestParam(value = "vehicleImages", required = false) List<MultipartFile> imageFiles)
+            throws IOException {
         ObjectMapper objectMapper = new ObjectMapper();
         Vehicle vehicle = objectMapper.readValue(vehicleJson, Vehicle.class);
 
@@ -98,15 +97,24 @@ public class VehicleController {
             }
         }
 
-        return vehicleService.editVehicle(id,vehicle);
+        return vehicleService.editVehicle(id, vehicle);
     }
-    @GetMapping(value = "/api/management/vehicle/detail/{id}")
-    public Vehicle getVehicleToDetail(@PathVariable Long id){
-        return vehicleService.getVehicleToDetail(id);
-    }
+
     @DeleteMapping(value = "/api/management/vehicle/del/{id}")
-    public boolean deleteVehicle(@PathVariable Long id){
+    public boolean deleteVehicle(@PathVariable Long id) {
         return vehicleService.deleteVehicle(id);
+    }
+
+    @GetMapping(value = "/api/vehicle/available")
+    public List<Vehicle> findAvailableVehicles(
+            @RequestParam("startDate") String startDate,
+            @RequestParam("endDate") String endDate) {
+        return vehicleService.findAvailableVehicles(startDate, endDate);
+    }
+
+    @GetMapping(value = "/api/vehicle/currently-available")
+    public List<Vehicle> findCurrentlyAvailableVehicles() {
+        return vehicleService.findCurrentlyAvailableVehicles();
     }
 
 }

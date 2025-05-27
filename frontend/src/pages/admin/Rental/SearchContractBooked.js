@@ -21,7 +21,7 @@ export const SearchContractBooked = () => {
     setTimeout(async () => {
       try {
         const response = await axios.get(
-          `http://localhost:8081/api/rental/contractSearch?name=${searchTerm}`
+          `http://localhost:8081/api/rentalContract/search?name=${searchTerm}`
         );
         console.log("Response data:", response.data);
         if (Array.isArray(response.data) && response.data.length > 0) {
@@ -49,8 +49,6 @@ export const SearchContractBooked = () => {
         startDate: detail.startDate,
         endDate: detail.endDate,
         totalEstimatedAmount: detail.totalEstimatedAmount,
-        depositAmount: detail.depositAmount,
-        dueAmount: detail.dueAmount,
       })),
       originalContractData: contract,
       mode: "booking",
